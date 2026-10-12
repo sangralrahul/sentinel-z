@@ -1,0 +1,82 @@
+/* Sentinel-Z console shell: sidebar navigation + scrolling content, like a real SaaS console.
+ * Follows the light/dark theme tokens defined in styles.css. */
+
+.app { --side-bg: color-mix(in srgb, var(--surface) 45%, var(--bg)); position: fixed; inset: 0; z-index: 40; display: grid; grid-template-columns: 248px minmax(0, 1fr); background: var(--bg); color: var(--ink); animation: appIn .35s cubic-bezier(.2, .8, .2, 1) both; }
+.app[hidden] { display: none; }
+body.in-app { overflow: hidden; }
+
+/* Sidebar */
+.app-side { background: var(--side-bg); border-right: 1px solid var(--line); display: flex; flex-direction: column; gap: 14px; padding: 14px 12px; min-height: 0; overflow-y: auto; }
+.app-brand { display: flex; align-items: center; gap: 10px; background: none; border: 0; padding: 6px 8px; border-radius: 8px; font-weight: 600; font-size: 15px; color: var(--ink); text-align: left; }
+.app-brand:hover { background: color-mix(in srgb, var(--ink) 6%, transparent); }
+.app-brand svg { width: 22px; height: 22px; color: var(--ink); }
+.app-source { display: grid; gap: 2px; padding: 10px 12px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); font-size: 12.5px; }
+.app-source b { font-weight: 600; font-size: 13px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.app-source span { color: var(--muted); font-family: var(--mono); font-size: 11.5px; }
+.app .tabs { position: static; display: grid; gap: 1px; border: 0; overflow: visible; background: none; }
+.app .tab { display: flex; align-items: center; gap: 10px; width: 100%; padding: 8px 10px; border: 0; border-radius: 7px; font-size: 14px; font-weight: 500; color: var(--ink-2); text-align: left; background: none; }
+.app .tab .i { width: 16px; height: 16px; color: var(--muted); }
+.app .tab:hover { background: color-mix(in srgb, var(--ink) 5%, transparent); color: var(--ink); }
+.app .tab[aria-selected="true"] { background: color-mix(in srgb, var(--ink) 8%, transparent); color: var(--ink); border: 0; }
+.app .tab[aria-selected="true"] .i { color: var(--accent); }
+.app .tab .count { margin-left: auto; }
+.app .tab kbd { display: inline-block; margin-left: auto; font-size: 10.5px; padding: 0 5px; color: var(--muted); background: transparent; border-color: var(--line); opacity: 0; transition: opacity .15s; }
+.app .tab .count + kbd { margin-left: 6px; }
+.app .tab:hover kbd { opacity: 1; }
+.app-side-foot { margin-top: auto; display: grid; gap: 4px; padding-top: 12px; border-top: 1px solid var(--line); }
+.side-btn { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 7px; border: 0; background: none; font-size: 13.5px; color: var(--ink-2); cursor: pointer; text-align: left; }
+.side-btn:hover { background: color-mix(in srgb, var(--ink) 5%, transparent); color: var(--ink); }
+.side-btn .i { color: var(--muted); }
+.side-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 8px 4px 0; }
+.app .privacy-pill { border: 1px solid color-mix(in srgb, var(--good) 35%, transparent); background: color-mix(in srgb, var(--good) 10%, transparent); color: var(--ink-2); font-size: 12px; }
+.app .theme-btn { border: 1px solid var(--line); color: var(--ink-2); background: var(--surface); border-radius: 8px; }
+.app .theme-btn:hover { background: var(--surface-2); }
+
+/* Main column */
+.app-main { min-width: 0; overflow-y: auto; scroll-behavior: smooth; }
+.app .run-bar { position: sticky; top: 0; z-index: 5; margin: 0; border: 0; border-bottom: 1px solid var(--line); border-radius: 0; padding: 12px 28px; background: color-mix(in srgb, var(--bg) 85%, transparent); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
+.app .rb-l strong { font-size: 15px; }
+.app-body { padding: 24px 28px 64px; max-width: 1280px; }
+.app .tabpanel { padding-top: 0; }
+.app .panel { border-radius: 12px; }
+.app .kpis { border-radius: 12px; }
+
+/* Mobile: sidebar becomes a top bar with scrolling sections */
+@media (max-width: 860px) {
+  .app { grid-template-columns: 1fr; grid-template-rows: auto minmax(0, 1fr); }
+  .app-side { flex-direction: row; flex-wrap: wrap; align-items: center; gap: 8px; padding: 8px 12px; border-right: 0; border-bottom: 1px solid var(--line); overflow: visible; }
+  .app-source, .app-side-foot .side-btn, .app .tab kbd { display: none; }
+  .app .tabs { order: 3; width: 100%; display: flex; overflow-x: auto; scrollbar-width: none; gap: 2px; }
+  .app .tab { width: auto; white-space: nowrap; padding: 7px 10px; }
+  .app-side-foot { margin: 0 0 0 auto; padding: 0; border: 0; }
+  .side-row { padding: 0; }
+  .app .run-bar { padding: 10px 16px; }
+  .app-body { padding: 16px 16px 48px; }
+}
+
+@keyframes appIn { from { opacity: 0; transform: scale(.985); } }
+
+/* Print the console as a report */
+@media print {
+  body.in-app { overflow: visible; }
+  .app { position: static; display: block; animation: none; }
+  .app-side, .run-bar, .site, .boot { display: none !important; }
+  .app-main { overflow: visible; }
+  .app-body { padding: 0; }
+  .print-head { display: grid !important; }
+}
+.app .rb-l .crumb { font-size: 14px; }
+.app .rb-l .crumb span { margin: 0 4px; opacity: .5; }
+.app .rb-meta { font-size: 12px; margin-right: 6px; }
+@media (max-width: 860px) { .app .rb-meta, .app .rb-l .crumb { display: none; } }
+.app .run-bar { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: nowrap; min-height: 56px; }
+.app .rb-l { display: flex; align-items: center; min-width: 0; }
+.app .rb-l > div { display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.app .rb-r { display: flex; align-items: center; gap: 8px; flex: none; }
+@media (max-width: 860px) {
+  .app { grid-template-columns: minmax(0, 1fr); }
+  .app-main { min-height: 0; }
+  .app-body > .tabpanel, .app .panel, .app .kpis { min-width: 0; max-width: 100%; }
+  .app .toolbar .search { width: 100%; }
+}
+@media (max-width: 560px) { .hide-sm { display: none; } }

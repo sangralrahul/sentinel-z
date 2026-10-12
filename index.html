@@ -1,0 +1,361 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Sentinel-Z · Private fraud detection for banking logs</title>
+  <meta name="description" content="Sentinel-Z finds attacks in banking security logs without exposing customer data. Keyed pseudonyms, explainable detection, runs on IBM Z.">
+  <meta name="theme-color" content="#08090a">
+  <link rel="icon" href="web/favicon.svg" type="image/svg+xml">
+  <link rel="preload" href="web/fonts/plex-sans-400.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="web/fonts/plex-sans-600.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="web/styles.css">
+  <link rel="stylesheet" href="web/site.css">
+  <link rel="stylesheet" href="web/console.css">
+  <link rel="stylesheet" href="web/app-shell.css">
+  <script type="module" src="web/app.js"></script>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-play" viewBox="0 0 24 24"><path d="M7 4v16l13-8z"/></symbol>
+  <symbol id="i-upload" viewBox="0 0 24 24"><path d="M12 16V4m0 0L7 9m5-5 5 5M4 16v3a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-3"/></symbol>
+  <symbol id="i-download" viewBox="0 0 24 24"><path d="M12 4v12m0 0-5-5m5 5 5-5M4 16v3a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-3"/></symbol>
+  <symbol id="i-lock" viewBox="0 0 24 24"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></symbol>
+  <symbol id="i-eyeoff" viewBox="0 0 24 24"><path d="M3 3l18 18M10.6 10.6a2 2 0 0 0 2.8 2.8M9.9 5.1A9.8 9.8 0 0 1 12 5c5 0 9 4.5 10 7-.4 1-1.2 2.3-2.4 3.6M6.1 6.1C3.9 7.5 2.5 9.6 2 12c1 2.5 5 7 10 7a9.7 9.7 0 0 0 5.9-2"/></symbol>
+  <symbol id="i-cpu" viewBox="0 0 24 24"><rect x="6" y="6" width="12" height="12" rx="1"/><path d="M9 2v4m6-4v4M9 18v4m6-4v4M2 9h4m-4 6h4m12-6h4m-4 6h4"/></symbol>
+  <symbol id="i-key" viewBox="0 0 24 24"><circle cx="8" cy="15" r="4"/><path d="m11 12 9-9m-3 3 3 3m-6 0 2 2"/></symbol>
+  <symbol id="i-crit" viewBox="0 0 24 24"><path d="M8 2h8l6 6v8l-6 6H8l-6-6V8z"/><path d="M12 8v5m0 3h.01"/></symbol>
+  <symbol id="i-high" viewBox="0 0 24 24"><path d="M12 3 2 20h20z"/><path d="M12 10v4m0 3h.01"/></symbol>
+  <symbol id="i-med" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 8v5m0 3h.01"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="m8 12 3 3 5-6"/></symbol>
+  <symbol id="i-chev" viewBox="0 0 24 24"><path d="m9 6 6 6-6 6"/></symbol>
+  <symbol id="i-moon" viewBox="0 0 24 24"><path d="M20 14.5A8 8 0 0 1 9.5 4 8 8 0 1 0 20 14.5z"/></symbol>
+  <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M4.9 4.9l1.4 1.4m11.4 11.4 1.4 1.4M2 12h2m16 0h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></symbol>
+  <symbol id="i-user" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></symbol>
+  <symbol id="i-share" viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="m8.6 13.5 6.8 4M15.4 6.5l-6.8 4"/></symbol>
+  <symbol id="i-copy" viewBox="0 0 24 24"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h8"/></symbol>
+  <symbol id="i-print" viewBox="0 0 24 24"><path d="M7 9V3h10v6M7 18H5a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="7" y="14" width="10" height="7"/></symbol>
+  <symbol id="i-kbd" viewBox="0 0 24 24"><rect x="2" y="6" width="20" height="12" rx="2"/><path d="M6 10h.01M10 10h.01M14 10h.01M18 10h.01M7 14h10"/></symbol>
+  <symbol id="i-target" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1"/></symbol>
+  <symbol id="i-sliders" viewBox="0 0 24 24"><path d="M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3M1 14h6M9 8h6M17 16h6"/></symbol>
+  <symbol id="i-clipboard" viewBox="0 0 24 24"><rect x="5" y="4" width="14" height="18" rx="2"/><path d="M9 4V2h6v2M9 11h6M9 15h4"/></symbol>
+  <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></symbol>
+  <symbol id="i-grid" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></symbol>
+  <symbol id="i-refresh" viewBox="0 0 24 24"><path d="M20 11a8 8 0 0 0-14.3-4.9L4 8m0-4v4h4M4 13a8 8 0 0 0 14.3 4.9L20 16m0 4v-4h-4"/></symbol>
+  <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M5 12h14m-6-6 6 6-6 6"/></symbol>
+  <symbol id="i-home" viewBox="0 0 24 24"><path d="m3 11 9-8 9 8v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></symbol>
+  <symbol id="i-activity" viewBox="0 0 24 24"><path d="M3 12h4l3-8 4 16 3-8h4"/></symbol>
+  <symbol id="i-layers" viewBox="0 0 24 24"><path d="m12 3 9 5-9 5-9-5z"/><path d="m3 13 9 5 9-5"/></symbol>
+  <symbol id="i-chart" viewBox="0 0 24 24"><path d="M4 20V10m6 10V4m6 16v-7m4 7H2"/></symbol>
+  <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 3 4 6v6c0 5 3.4 8.6 8 10 4.6-1.4 8-5 8-10V6z"/></symbol>
+  <symbol id="i-book" viewBox="0 0 24 24"><path d="M4 5a2 2 0 0 1 2-2h14v16H6a2 2 0 0 0-2 2z"/><path d="M4 21V5"/></symbol>
+  <symbol id="i-terminal" viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m6 9 3 3-3 3m5 0h6"/></symbol>
+  <symbol id="i-github" viewBox="0 0 24 24"><path d="M9 19c-4.3 1.4-4.3-2.5-6-3m12 5v-3.5c0-1 .1-1.4-.5-2 2.8-.3 5.5-1.4 5.5-6a4.6 4.6 0 0 0-1.3-3.2 4.2 4.2 0 0 0-.1-3.2s-1.1-.3-3.5 1.3a12.3 12.3 0 0 0-6.2 0C6.5 2.8 5.4 3.1 5.4 3.1a4.2 4.2 0 0 0-.1 3.2A4.6 4.6 0 0 0 4 9.5c0 4.6 2.7 5.7 5.5 6-.6.6-.6 1.2-.5 2V21"/></symbol>
+</svg>
+
+
+<div class="site" id="site">
+<header class="nav-bar">
+  <div class="nav-in">
+    <a class="logo" href="#top" aria-label="Sentinel-Z home">
+      <svg viewBox="0 0 32 32" aria-hidden="true"><path d="M16 2 4 7v8c0 7.5 5.1 13.4 12 15 6.9-1.6 12-7.5 12-15V7z" fill="#f7f8f8"/><path d="M11 11h10l-10 10h10" fill="none" stroke="#08090a" stroke-width="2.6" stroke-linecap="square"/></svg>
+      <span>Sentinel-Z</span>
+    </a>
+    <nav class="nav-links" aria-label="Sections">
+      <a href="#product">Product</a>
+      <a href="#how">How it works</a>
+      <a href="#ibmz">IBM Z</a>
+      <a href="#analyse">Try it</a>
+      <a href="https://github.com/sangralrahul/sentinel-z" rel="noopener">GitHub</a>
+    </nav>
+    <div class="nav-cta">
+      <a class="lnk" href="#analyse">Upload logs</a>
+      <button class="b b-light b-sm" type="button" data-demo>Open console</button>
+    </div>
+  </div>
+</header>
+
+<section class="hero" id="top">
+  <div class="hero-bg" aria-hidden="true"><canvas id="field"></canvas><span class="beam b1"></span><span class="beam b2"></span></div>
+  <div class="hero-in">
+    <a class="announce" href="#ibmz"><span class="tag">IBM Z Datathon 2026</span><span>Challenge 2 · AI Secured: Innovation Without Exposure</span><svg class="i"><use href="#i-arrow"/></svg></a>
+    <h1 class="words">Fraud detection that never<br>sees who the customer is</h1>
+    <p class="lede">Sentinel-Z pseudonymises banking security logs before analysis, learns how each customer normally behaves, and explains every alert in plain words. It runs in this tab or on IBM Z. Nothing is sent anywhere.</p>
+    <div class="hero-cta">
+      <button class="b b-light" id="heroDemoBtn" type="button" data-demo>Open the live console<svg class="i"><use href="#i-arrow"/></svg></button>
+      <a class="b b-dark" href="#analyse"><svg class="i"><use href="#i-upload"/></svg>Analyse your own logs</a>
+    </div>
+    <p class="hero-note">No sign-up. Synthetic bank preloaded. Press <kbd>D</kbd> anytime.</p>
+  </div>
+
+  <div class="shot-wrap" id="product">
+    <div class="shot-glow" aria-hidden="true"></div>
+    <div class="shot" id="shot" aria-label="Live preview of the Sentinel-Z console on synthetic data">
+      <aside class="s-side" aria-hidden="true">
+        <div class="s-brand"><span class="s-logo"></span>Synthetic Bank<svg class="i"><use href="#i-chev"/></svg></div>
+        <div class="s-nav">
+          <span><svg class="i"><use href="#i-grid"/></svg>Overview</span>
+          <span class="on"><svg class="i"><use href="#i-activity"/></svg>Live stream<em id="pAlertsSide">0</em></span>
+          <span><svg class="i"><use href="#i-layers"/></svg>Incidents</span>
+          <span><svg class="i"><use href="#i-target"/></svg>Simulator</span>
+          <span><svg class="i"><use href="#i-chart"/></svg>Model quality</span>
+          <span><svg class="i"><use href="#i-shield"/></svg>Privacy</span>
+        </div>
+        <div class="s-foot"><span class="s-dot"></span>On-device · 0 calls</div>
+      </aside>
+      <div class="s-main">
+        <div class="s-top">
+          <div class="s-crumb"><span>Live stream</span><span class="muted-x">· replay of the synthetic bank</span></div>
+          <div class="s-stats">
+            <span><b id="cScanned">0</b> events</span>
+            <span><b id="cTokens">0</b> pseudonymised</span>
+            <span><b id="cPii">0</b> PII masked</span>
+            <span class="al"><b id="cAlerts">0</b> alerts</span>
+          </div>
+        </div>
+        <div class="s-head mono"><span>Time</span><span>Event</span><span>Customer</span><span>Where</span><span>Risk</span></div>
+        <div class="s-rows" id="cStream"><div class="s-wait" id="cState"><span class="spinner"></span>Learning normal behaviour on this device…</div></div>
+      </div>
+      <aside class="s-detail" id="pDetail">
+        <div class="d-empty"><svg class="i"><use href="#i-shield"/></svg><span>Waiting for the next alert…</span></div>
+      </aside>
+    </div>
+  </div>
+</section>
+
+<section class="stack" aria-label="Technology">
+  <div class="marq"><div class="marq-track">
+    <span>HMAC-SHA256 pseudonyms</span><span>Isolation Forest</span><span>Explainable rules</span><span>ε-differential privacy</span><span>MITRE ATT&amp;CK</span><span>linux/s390x</span><span>Zero dependencies</span><span>IBM Granite, local</span><span>Web Worker</span><span>Content-Security-Policy</span>
+    <span aria-hidden="true">HMAC-SHA256 pseudonyms</span><span aria-hidden="true">Isolation Forest</span><span aria-hidden="true">Explainable rules</span><span aria-hidden="true">ε-differential privacy</span><span aria-hidden="true">MITRE ATT&amp;CK</span><span aria-hidden="true">linux/s390x</span><span aria-hidden="true">Zero dependencies</span><span aria-hidden="true">IBM Granite, local</span><span aria-hidden="true">Web Worker</span><span aria-hidden="true">Content-Security-Policy</span>
+  </div></div>
+</section>
+
+<main class="lp">
+  <section class="numbers" aria-label="Results on the demo bank">
+    <div><b id="mAuc">—</b><span>ROC-AUC on the synthetic bank</span></div>
+    <div><b id="mCaught">—</b><span>Injected attacks caught</span></div>
+    <div><b id="mMs">—</b><span>To analyse 6,000 events in this tab</span></div>
+    <div><b id="mNet">0</b><span>Requests sent to other servers</span></div>
+  </section>
+
+  <section class="blk">
+    <div class="blk-h reveal">
+      <h2>Built for the analyst.<br><span class="dim">Blind to the customer.</span></h2>
+      <p>Every screen works on pseudonyms. The only way back to a real person is the bank's own key and records.</p>
+    </div>
+    <div class="bento">
+      <article class="tile t-wide reveal">
+        <div class="viz v-pseudo" aria-hidden="true">
+          <div class="row-raw mono"><span class="k">user</span><span id="bRawUser">priya.sharma4@bank.example</span></div>
+          <div class="row-raw mono"><span class="k">ip</span><span id="bRawIp">10.65.198.180</span></div>
+          <div class="row-raw mono"><span class="k">note</span><span id="bRawNote">Call +91 98765 43210 re card 4111 1111 1111 1111</span></div>
+          <div class="arrow-down"><span>HMAC-SHA256 · redaction</span></div>
+          <div class="row-safe mono"><span class="k">user</span><span id="bSafeUser">usr_…</span></div>
+          <div class="row-safe mono"><span class="k">ip</span><span id="bSafeIp">ip_…</span></div>
+          <div class="row-safe mono"><span class="k">note</span><span id="bSafeNote">…</span></div>
+        </div>
+        <h3>Pseudonymised before the model sees a row</h3>
+        <p>Identifiers become keyed tokens and personal data in free text is masked. This demo uses your session key, live.</p>
+      </article>
+      <article class="tile reveal">
+        <div class="viz v-alert" aria-hidden="true">
+          <div class="al-card">
+            <div class="al-top"><span class="sev critical"><svg class="i"><use href="#i-crit"/></svg>Critical</span><span class="mono dimx">risk 0.99</span></div>
+            <strong>Impossible travel: Indore → Lagos</strong>
+            <div class="chips"><span>7,934 km in 424 min</span><span>New device</span><span>Payee never seen</span><span>03:12, usually 20:18</span></div>
+          </div>
+        </div>
+        <h3>Explained, not just scored</h3>
+        <p>Every alert lists its reasons. No black-box number to defend.</p>
+      </article>
+      <article class="tile reveal">
+        <div class="viz v-sim" aria-hidden="true">
+          <div><span>Account takeover</span><b class="ok">Caught</b></div>
+          <div><span>Credential stuffing</span><b class="ok">Caught</b></div>
+          <div><span>Mule transfers</span><b class="ok">Caught</b></div>
+          <div><span>Data exfiltration</span><b class="ok">Caught</b></div>
+          <div><span>Low-and-slow insider</span><b class="mid">Sometimes</b></div>
+        </div>
+        <h3>Red-teams itself</h3>
+        <p>Inject seven attack types and watch the verdict, including the one it can miss.</p>
+      </article>
+      <article class="tile reveal">
+        <div class="viz v-attack" aria-hidden="true">
+          <span>T1078<small>Valid Accounts</small></span><span>T1110<small>Brute Force</small></span><span>T1110.004<small>Credential Stuffing</small></span><span>T1213<small>Data from Repositories</small></span>
+        </div>
+        <h3>Speaks ATT&amp;CK</h3>
+        <p>Signals map to MITRE techniques, so findings drop straight into SOC workflows.</p>
+      </article>
+      <article class="tile reveal">
+        <div class="viz v-dp" aria-hidden="true">
+          <div class="dp-row"><span>Alerts</span><i style="--w:72%"></i><b>144</b><i class="n" style="--w:71.5%"></i><b class="n">143</b></div>
+          <div class="dp-row"><span>Incidents</span><i style="--w:38%"></i><b>76</b><i class="n" style="--w:39%"></i><b class="n">77</b></div>
+          <div class="dp-row"><span>Travel</span><i style="--w:20%"></i><b>41</b><i class="n" style="--w:19%"></i><b class="n">39</b></div>
+          <div class="dp-key"><span><i></i>Exact, stays inside</span><span><i class="n"></i>Shared, ε = 1</span></div>
+        </div>
+        <h3>Private by the numbers</h3>
+        <p>Counts that leave the security team carry calibrated Laplace noise.</p>
+      </article>
+      <article class="tile t-full reveal">
+        <div class="viz v-csp" aria-hidden="true">
+<pre class="mono"><span class="c">// vercel.json · every response</span>
+<span class="p">Content-Security-Policy</span>: default-src 'self';
+  <span class="h">connect-src 'self'</span>; script-src 'self'; frame-ancestors 'none'</pre>
+          <div class="zero"><b id="bZero">0</b><span>external requests<br>since you opened this page</span></div>
+        </div>
+        <h3>Proof, not promises</h3>
+        <p>The browser itself blocks uploads to other servers, and the page counts its own network requests live.</p>
+      </article>
+    </div>
+  </section>
+
+  <section class="blk" id="how">
+    <div class="blk-h reveal">
+      <h2>How it works</h2>
+      <p>Five steps, one engine, no dependencies. Click a step to see what the data looks like at that point.</p>
+    </div>
+    <div class="steps reveal">
+      <ol class="step-list" role="tablist" aria-label="Pipeline steps">
+        <li><button type="button" role="tab" data-step="0" aria-selected="true"><b>01</b><span><strong>Protect</strong><small>Keyed pseudonyms and PII masking</small></span></button></li>
+        <li><button type="button" role="tab" data-step="1" aria-selected="false"><b>02</b><span><strong>Learn normal</strong><small>A baseline for every customer</small></span></button></li>
+        <li><button type="button" role="tab" data-step="2" aria-selected="false"><b>03</b><span><strong>Score</strong><small>Isolation Forest + expert rules</small></span></button></li>
+        <li><button type="button" role="tab" data-step="3" aria-selected="false"><b>04</b><span><strong>Explain</strong><small>Reasons, incidents, ATT&amp;CK</small></span></button></li>
+        <li><button type="button" role="tab" data-step="4" aria-selected="false"><b>05</b><span><strong>Share safely</strong><small>Differential privacy for reports</small></span></button></li>
+      </ol>
+      <div class="step-view" role="tabpanel" aria-live="polite">
+        <div class="sv-bar"><span class="dots"><i></i><i></i><i></i></span><span class="mono" id="svTitle">step-1.json</span></div>
+        <pre class="mono" id="svBody"></pre>
+        <div class="sv-progress"><i id="svProg"></i></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="blk ibmz" id="ibmz">
+    <div class="split2">
+      <div class="reveal">
+        <span class="kicker">IBM Z · LinuxONE</span>
+        <h2>Runs where the bank already runs</h2>
+        <p class="p-lg">Core banking lives on IBM Z. Sentinel-Z is plain JavaScript with zero dependencies, so the same engine runs on <span class="mono">linux/s390x</span> next to the data. Nothing needs to be copied to a cloud AI service.</p>
+        <ul class="ticks">
+          <li><svg class="i"><use href="#i-check"/></svg>Multi-arch container, built and tested for s390x in CI</li>
+          <li><svg class="i"><use href="#i-check"/></svg>Optional analyst summaries from IBM Granite, running locally</li>
+          <li><svg class="i"><use href="#i-check"/></svg>Inference path ready for the IBM Z Integrated Accelerator for AI</li>
+        </ul>
+      </div>
+      <div class="term reveal" aria-label="Command line example">
+        <div class="sv-bar"><span class="dots"><i></i><i></i><i></i></span><span class="mono">linuxone ~ sentinel-z</span></div>
+<pre class="mono"><span class="pr">$</span> docker run --platform linux/s390x sentinel-z \
+    node cli/sentinel-z.js simulate --type account_takeover
+
+<b>Simulated Account takeover</b>
+  <span class="cr">CRITICAL</span>  risk 0.98  login      Impossible travel: Indore → Lagos
+  <span class="cr">CRITICAL</span>  risk 0.99  transfer   Transfer of ₹1,60,503 is 30× the usual
+
+<span class="ok">Detected: 2/2 events alerted (threshold 0.782)</span>
+<span class="pr">$</span> <span class="cur"></span></pre>
+      </div>
+    </div>
+  </section>
+
+  <section class="blk" id="analyse">
+    <div class="blk-h reveal">
+      <h2>Try it on your own logs</h2>
+      <p>Files are read in this tab and never uploaded. Close the tab and everything is gone.</p>
+    </div>
+    <div class="analyse-card reveal">
+      <div class="drop" id="drop">
+        <div class="drop-ic"><svg class="i"><use href="#i-upload"/></svg></div>
+        <div class="drop-txt"><strong>Drop a CSV or JSON file</strong><span>Needs <span class="mono">timestamp, user, event</span>. Optional: <span class="mono">ip, device, city, amount, bytes, account, note, label</span>.</span></div>
+        <div class="drop-act">
+          <label class="b b-dark" for="fileInput"><svg class="i"><use href="#i-upload"/></svg>Choose file</label>
+          <input type="file" id="fileInput" accept=".csv,.json,text/csv,application/json" hidden>
+          <button class="b b-light" id="demoBtn" type="button">Use demo bank</button>
+        </div>
+      </div>
+      <div class="settings">
+        <div class="field">
+          <label for="baseline">Normal-behaviour window</label>
+          <select id="baseline"><option value="auto">First 70% of the data</option><option value="7">First 7 days</option><option value="14" selected>First 14 days</option></select>
+        </div>
+        <div class="field">
+          <label for="sensitivity">Alert sensitivity</label>
+          <select id="sensitivity"><option value="99.8">Strict · fewer alerts</option><option value="99.5" selected>Balanced</option><option value="99">Sensitive · more alerts</option></select>
+        </div>
+        <div class="field">
+          <label for="keyInput">Privacy key (memory only)</label>
+          <div class="key-row"><input id="keyInput" type="password" autocomplete="off" spellcheck="false" aria-describedby="keyFp"><button class="b b-dark b-sm" id="keyGen" type="button" title="Generate a new random key"><svg class="i"><use href="#i-refresh"/></svg>New</button></div>
+        </div>
+        <p class="hint">Fingerprint <span class="mono" id="keyFp">—</span> · same key, same pseudonyms. <a href="data/sample-events.csv" download="sentinel-z-sample-events.csv">Sample CSV</a></p>
+      </div>
+      <div class="status" id="status" role="status" aria-live="polite" hidden></div>
+    </div>
+  </section>
+
+  <section class="final reveal"><div class="final-bg" aria-hidden="true"></div>
+    <h2>See it catch an attack in under a second.</h2>
+    <div class="hero-cta"><button class="b b-light" type="button" data-demo>Open the live console<svg class="i"><use href="#i-arrow"/></svg></button><a class="b b-dark" href="https://github.com/sangralrahul/sentinel-z" rel="noopener"><svg class="i"><use href="#i-github"/></svg>View source</a></div>
+  </section>
+</main>
+
+<footer class="site-foot">
+  <div class="sf-in">
+    <div class="sf-brand"><a class="logo" href="#top"><svg viewBox="0 0 32 32" aria-hidden="true"><path d="M16 2 4 7v8c0 7.5 5.1 13.4 12 15 6.9-1.6 12-7.5 12-15V7z" fill="#f7f8f8"/><path d="M11 11h10l-10 10h10" fill="none" stroke="#08090a" stroke-width="2.6" stroke-linecap="square"/></svg><span>Sentinel-Z</span></a><p>Privacy-preserving anomaly detection for banking security logs.</p></div>
+    <div class="sf-col"><h4>Product</h4><a href="#product">Live console</a><a href="#how">How it works</a><a href="#analyse">Analyse logs</a></div>
+    <div class="sf-col"><h4>Project</h4><a href="https://github.com/sangralrahul/sentinel-z" rel="noopener">Source code</a><a href="https://github.com/sangralrahul/sentinel-z#readme" rel="noopener">README</a><a href="https://github.com/sangralrahul/sentinel-z/blob/main/docs/EXPLAINER.md" rel="noopener">Explainer</a></div>
+    <div class="sf-col"><h4>Team Bitverse</h4><span>IBM Z Datathon 2026</span><span>Challenge 2 · AI Secured</span><span>MIT licence</span></div>
+  </div>
+  <div class="sf-base"><span>© 2026 Team Bitverse. All demo data is synthetic.</span><span>Built for IBM Z · linux/s390x</span></div>
+</footer>
+</div>
+
+<section id="results" class="app" hidden>
+  <aside class="app-side">
+    <button class="app-brand" id="appHome" type="button" title="Back to home"><svg viewBox="0 0 32 32" aria-hidden="true"><path d="M16 2 4 7v8c0 7.5 5.1 13.4 12 15 6.9-1.6 12-7.5 12-15V7z" fill="currentColor"/><path d="M11 11h10l-10 10h10" fill="none" stroke="var(--side-bg)" stroke-width="2.6" stroke-linecap="square"/></svg><span>Sentinel-Z</span></button>
+    <div class="app-source" id="appSource"></div>
+    <div class="tabs" role="tablist" aria-label="Console sections" aria-orientation="vertical">
+      <button class="tab" role="tab" id="tab-overview" aria-controls="p-overview" aria-selected="true"><svg class="i"><use href="#i-grid"/></svg><span>Overview</span><kbd>1</kbd></button>
+      <button class="tab" role="tab" id="tab-incidents" aria-controls="p-incidents" aria-selected="false" tabindex="-1"><svg class="i"><use href="#i-layers"/></svg><span>Incidents</span><span class="count" id="incCount">0</span><kbd>2</kbd></button>
+      <button class="tab" role="tab" id="tab-sim" aria-controls="p-sim" aria-selected="false" tabindex="-1"><svg class="i"><use href="#i-target"/></svg><span>Simulator</span><kbd>3</kbd></button>
+      <button class="tab" role="tab" id="tab-quality" aria-controls="p-quality" aria-selected="false" tabindex="-1"><svg class="i"><use href="#i-chart"/></svg><span>Model quality</span><kbd>4</kbd></button>
+      <button class="tab" role="tab" id="tab-privacy" aria-controls="p-privacy" aria-selected="false" tabindex="-1"><svg class="i"><use href="#i-shield"/></svg><span>Privacy</span><kbd>5</kbd></button>
+      <button class="tab" role="tab" id="tab-how" aria-controls="p-how" aria-selected="false" tabindex="-1"><svg class="i"><use href="#i-book"/></svg><span>How it works</span><kbd>6</kbd></button>
+    </div>
+    <div class="app-side-foot">
+      <label class="side-btn" for="fileInput"><svg class="i"><use href="#i-upload"/></svg>Analyse a file</label>
+      <button class="side-btn" id="appKeys" type="button"><svg class="i"><use href="#i-kbd"/></svg>Shortcuts</button>
+      <div class="side-row">
+        <span class="privacy-pill" id="netPill" title="Requests this page has made to servers other than the one it came from"><span class="dot"></span><span id="netPillText">0 external calls</span></span>
+        <button class="theme-btn" id="themeBtn" type="button" aria-label="Switch colour theme"><svg class="i"><use href="#i-moon"/></svg></button>
+      </div>
+    </div>
+  </aside>
+  <div class="app-main" id="appMain">
+    <div class="print-head"><strong>Sentinel-Z incident report</strong><span id="printMeta"></span></div>
+    <div class="run-bar" id="runBar"></div>
+    <div class="app-body">
+      <div class="tabpanel" role="tabpanel" id="p-overview" aria-labelledby="tab-overview"></div>
+      <div class="tabpanel" role="tabpanel" id="p-incidents" aria-labelledby="tab-incidents" hidden></div>
+      <div class="tabpanel" role="tabpanel" id="p-sim" aria-labelledby="tab-sim" hidden></div>
+      <div class="tabpanel" role="tabpanel" id="p-quality" aria-labelledby="tab-quality" hidden></div>
+      <div class="tabpanel" role="tabpanel" id="p-privacy" aria-labelledby="tab-privacy" hidden></div>
+      <div class="tabpanel" role="tabpanel" id="p-how" aria-labelledby="tab-how" hidden></div>
+    </div>
+  </div>
+</section>
+
+<div class="boot" id="boot" hidden><div class="boot-card"><span class="spinner"></span><div><strong id="bootTitle">Opening console</strong><span id="bootSub">Pseudonymising and scoring on this device…</span></div></div></div>
+
+<dialog class="keys" id="keys" aria-labelledby="keysTitle">
+  <div class="keys-h"><h2 id="keysTitle">Keyboard shortcuts</h2><button class="theme-btn" id="keysClose" type="button" aria-label="Close">✕</button></div>
+  <dl>
+    <div><dt><kbd>D</kbd></dt><dd>Open the console with the demo bank</dd></div>
+    <div><dt><kbd>1</kbd>–<kbd>6</kbd></dt><dd>Switch console sections</dd></div>
+    <div><dt><kbd>/</kbd></dt><dd>Search incidents</dd></div>
+    <div><dt><kbd>E</kbd></dt><dd>Export pseudonymised report</dd></div>
+    <div><dt><kbd>P</kbd></dt><dd>Print incident report</dd></div>
+    <div><dt><kbd>Esc</kbd></dt><dd>Back to the home page</dd></div>
+    <div><dt><kbd>?</kbd></dt><dd>Show or hide this list</dd></div>
+  </dl>
+</dialog>
+</body>
+</html>
