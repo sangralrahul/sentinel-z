@@ -9,12 +9,16 @@
  *                      [--sensitivity 99.5] [--out report.json] [--explain]
  */
 import fs from 'node:fs';
+import { webcrypto } from 'node:crypto';
 import path from 'node:path';
 import { generateScenario, ATTACK_TYPES } from '../core/generator.js';
 import { analyze, parseCSV, toCSV } from '../core/pipeline.js';
 import { randomKey } from '../core/privacy.js';
 import { explainLocally, isLocalUrl } from './llm.js';
 import { injectAttack, SIM_ATTACKS } from '../core/simulator.js';
+
+// Node 18 does not expose Web Crypto as a global; the shared core uses globalThis.crypto.
+if (!globalThis.crypto?.getRandomValues) Object.defineProperty(globalThis, 'crypto', { value: webcrypto, configurable: true });
 
 const args = process.argv.slice(2);
 const cmd = args[0];

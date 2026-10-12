@@ -137,3 +137,11 @@ test('red-team simulator: obvious attacks are caught, targets are clean customer
   }
   assert.throws(() => injectAttack(generateScenario({ users: 10, days: 6, attackDays: 2 }), { type: 'nope' }), /Unknown attack/);
 });
+
+test('CLI runs end to end without SENTINEL_KEY (random key path)', async () => {
+  const { execFileSync } = await import('node:child_process');
+  const env = { ...process.env }; delete env.SENTINEL_KEY;
+  const out = execFileSync(process.execPath, ['cli/sentinel-z.js', 'analyze', 'data/sample-events.csv', '--train-days', '14'], { env, encoding: 'utf8' });
+  assert.match(out, /attacks caught 26\/26/);
+  assert.ok(!out.includes('@bank.example'));
+});

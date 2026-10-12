@@ -31,8 +31,10 @@ export function createPseudonymizer(secret) {
 
 /** Random 32-character key from a cryptographically secure source. */
 export function randomKey() {
+  const c = globalThis.crypto;
+  if (!c?.getRandomValues) throw new Error('No secure random source available. Set a privacy key explicitly (SENTINEL_KEY).');
   const bytes = new Uint8Array(16);
-  globalThis.crypto.getRandomValues(bytes);
+  c.getRandomValues(bytes);
   return toHex(bytes);
 }
 
