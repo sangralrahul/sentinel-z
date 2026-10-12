@@ -11,7 +11,7 @@ COPY cli ./cli
 COPY web ./web
 COPY data ./data
 COPY tests ./tests
-COPY index.html ./
+COPY index.html vercel.json ./
 RUN node --test && addgroup -S app && adduser -S app -G app
 USER app
 ENV PORT=5173
