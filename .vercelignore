@@ -1,0 +1,6 @@
+cli/
+tests/
+docs/
+Dockerfile
+.dockerignore
+.github/
