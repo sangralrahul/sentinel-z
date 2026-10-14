@@ -1,0 +1,84 @@
+2026-10-05T02:14:11.205Z,kunal.bose27@bank.example,transfer,10.161.242.212,MacBook-3114,Chennai,14250,,165111560095,,,normal,
+2026-10-05T02:18:44.912Z,sneha.singh4@bank.example,login,10.137.78.60,Windows-6781,Patna,,,,,,normal,
+2026-10-05T02:22:15.110Z,sneha.singh4@bank.example,transfer,10.137.78.60,Windows-6781,Patna,18450,,635406972793,,"Rent to Aarav, ref sneha.singh4@bank.example",normal,
+2026-10-05T02:45:30.822Z,saanvi.iyer50@bank.example,login,10.20.127.76,Windows-9846,Kochi,,,,,,normal,
+2026-10-05T02:49:12.441Z,saanvi.iyer50@bank.example,download,10.20.127.76,Windows-9846,Kochi,,194510,,,Monthly statement,normal,
+2026-10-05T03:10:02.190Z,vihaan.patel36@bank.example,login,10.140.27.21,Windows-4102,Hyderabad,,,,,,normal,
+2026-10-05T03:15:44.821Z,vihaan.patel36@bank.example,transfer,10.140.27.21,Windows-4102,Hyderabad,4120,,616286086430,,,normal,
+2026-10-05T03:32:19.450Z,ananya.singh15@bank.example,login,10.17.142.93,Windows-7493,Delhi,,,,,,normal,
+2026-10-05T03:36:50.118Z,ananya.singh15@bank.example,transfer,10.17.142.93,Windows-7493,Delhi,6120,,813971335254,,,normal,
+2026-10-05T04:12:05.771Z,sneha.gupta26@bank.example,login,10.180.155.206,MacBook-7744,Kolkata,,,,,,normal,
+2026-10-05T04:16:30.334Z,sneha.gupta26@bank.example,transfer,10.180.155.206,MacBook-7744,Kolkata,11200,,765164707717,,,normal,
+2026-10-05T04:30:12.019Z,sneha.gupta26@bank.example,login,10.180.155.206,MacBook-7744,Kolkata,,,,,,normal,
+2026-10-05T04:48:22.180Z,sneha.gupta26@bank.example,login,194.26.29.44,Linux-7744,Frankfurt,,,,,,impossible_travel,travel-11
+2026-10-05T05:01:10.512Z,aarav.sharma0@bank.example,login,10.138.182.65,MacBook-5693,Indore,,,,,,normal,
+2026-10-05T05:05:43.914Z,aarav.sharma0@bank.example,transfer,10.138.182.65,MacBook-5693,Indore,4890,,431162734073,,"Rent to Meera, ref aarav.sharma0@bank.example",normal,
+2026-10-05T05:22:18.665Z,ishaan.singh68@bank.example,login,10.161.149.243,Windows-5489,Hyderabad,,,,,,normal,
+2026-10-05T05:26:09.112Z,ishaan.singh68@bank.example,download,10.161.149.243,Windows-5489,Hyderabad,,210450,,,Monthly statement,normal,
+2026-10-05T06:12:40.330Z,arjun.joshi18@bank.example,login,10.10.175.191,Windows-9502,Indore,,,,,,normal,
+2026-10-05T06:16:20.918Z,arjun.joshi18@bank.example,transfer,10.10.175.191,Windows-9502,Indore,5100,,582379552209,,,normal,
+2026-10-05T07:05:14.280Z,riya.bose9@bank.example,login,10.97.152.215,MacBook-2461,Jaipur,,,,,,normal,
+2026-10-05T07:09:41.002Z,riya.bose9@bank.example,transfer,10.97.152.215,MacBook-2461,Jaipur,3250,,160665146540,,"Rent to Kabir, ref riya.bose9@bank.example",normal,
+2026-10-05T08:14:22.719Z,diya.mehta2@bank.example,login,10.175.172.83,Windows-5217,Kolkata,,,,,,normal,
+2026-10-05T08:18:02.404Z,diya.mehta2@bank.example,transfer,10.175.172.83,Windows-5217,Kolkata,2150,,271337974211,,,normal,
+2026-10-05T09:20:10.518Z,kabir.gupta67@bank.example,login,10.13.163.23,Android-5421,Mumbai,,,,,,normal,
+2026-10-05T09:24:40.890Z,kabir.gupta67@bank.example,transfer,10.13.163.23,Android-5421,Mumbai,4200,,332185385865,,,normal,
+2026-10-05T10:14:02.119Z,nisha.patel12@bank.example,login,10.65.198.180,Linux-3441,Delhi,,,,,,normal,
+2026-10-05T10:18:55.772Z,nisha.patel12@bank.example,download,10.65.198.180,Linux-3441,Delhi,,341020,,,Monthly statement,normal,
+2026-10-05T11:05:30.901Z,arjun.patel76@bank.example,login,10.135.7.210,iPhone-7000,Pune,,,,,,normal,
+2026-10-05T11:09:18.665Z,arjun.patel76@bank.example,transfer,10.135.7.210,iPhone-7000,Pune,1850,,141727322619,,,normal,
+2026-10-05T12:30:19.412Z,kunal.nair41@bank.example,login,10.13.41.248,Linux-7609,Indore,,,,,,normal,
+2026-10-05T12:35:10.884Z,kunal.nair41@bank.example,transfer,10.13.41.248,Linux-7609,Indore,9450,,487378125614,,,normal,
+2026-10-05T14:10:04.180Z,aditya.singh43@bank.example,login,10.113.194.222,MacBook-7916,Indore,,,,,,normal,
+2026-10-05T14:15:33.918Z,aditya.singh43@bank.example,transfer,10.113.194.222,MacBook-7916,Indore,3400,,606567520322,,,normal,
+2026-10-05T19:40:15.110Z,dev.mehta35@bank.example,login_failed,185.220.101.5,Linux-bot,São Paulo,,,,,,credential_stuffing,stuffing-13
+2026-10-05T19:42:30.419Z,kavya.joshi47@bank.example,login_failed,185.220.101.5,Linux-bot,São Paulo,,,,,,credential_stuffing,stuffing-13
+2026-10-05T19:44:11.890Z,isha.nair32@bank.example,login_failed,185.220.101.5,Linux-bot,São Paulo,,,,,,credential_stuffing,stuffing-13
+2026-10-05T19:46:02.104Z,rohan.khan56@bank.example,login_failed,185.220.101.5,Linux-bot,São Paulo,,,,,,credential_stuffing,stuffing-13
+2026-10-05T19:48:45.612Z,saanvi.das23@bank.example,login_failed,185.220.101.5,Linux-bot,São Paulo,,,,,,credential_stuffing,stuffing-13
+2026-10-05T19:51:20.910Z,arjun.joshi1@bank.example,login_failed,185.220.101.5,Linux-bot,São Paulo,,,,,,credential_stuffing,stuffing-13
+2026-10-05T19:54:05.334Z,nisha.khan8@bank.example,login,185.220.101.5,Linux-bot,São Paulo,,,,,,credential_stuffing,stuffing-13
+2026-10-05T20:10:15.421Z,meera.mehta17@bank.example,login_failed,103.145.12.88,Windows-0001,Delhi,,,,,,brute_force,brute-17
+2026-10-05T20:10:55.421Z,meera.mehta17@bank.example,login_failed,103.145.12.88,Windows-0001,Delhi,,,,,,brute_force,brute-17
+2026-10-05T20:11:35.421Z,meera.mehta17@bank.example,login_failed,103.145.12.88,Windows-0001,Delhi,,,,,,brute_force,brute-17
+2026-10-05T20:12:15.421Z,meera.mehta17@bank.example,login_failed,103.145.12.88,Windows-0001,Delhi,,,,,,brute_force,brute-17
+2026-10-05T20:12:55.421Z,meera.mehta17@bank.example,login,103.145.12.88,Windows-0001,Delhi,,,,,,brute_force,brute-17
+2026-10-05T20:18:10.992Z,meera.mehta17@bank.example,transfer,103.145.12.88,Windows-0001,Delhi,182400,,921104882190,,"Urgent payment, call 9820019481",account_takeover,ato-6
+2026-10-05T21:15:00.124Z,dev.joshi66@bank.example,login,10.133.133.146,iPhone-4752,Pune,,,,,,insider_misuse,insider-29
+2026-10-05T21:17:10.124Z,dev.joshi66@bank.example,download,10.133.133.146,iPhone-4752,Pune,,1284501,,,,insider_misuse,insider-29
+2026-10-05T21:20:45.124Z,dev.joshi66@bank.example,download,10.133.133.146,iPhone-4752,Pune,,1492004,,,,insider_misuse,insider-29
+2026-10-05T21:24:15.124Z,dev.joshi66@bank.example,download,10.133.133.146,iPhone-4752,Pune,,1115802,,,,insider_misuse,insider-29
+2026-10-05T21:30:10.124Z,dev.joshi66@bank.example,transfer,10.133.133.146,iPhone-4752,Pune,48500,,994777619815,,,insider_misuse,insider-29
+2026-10-06T00:30:00.000Z,ananya.singh15@bank.example,login,10.17.142.93,Windows-7493,Delhi,,,,,,normal,
+2026-10-06T00:35:12.441Z,ananya.singh15@bank.example,transfer,10.17.142.93,Windows-7493,Delhi,3890,,412820034078,,,normal,
+2026-10-06T01:14:22.019Z,saanvi.iyer50@bank.example,login,10.20.127.76,MacBook-9353,Kochi,,,,,,normal,
+2026-10-06T01:19:05.811Z,saanvi.iyer50@bank.example,transfer,10.20.127.76,MacBook-9353,Kochi,2190,,460612534522,,,normal,
+2026-10-06T02:05:14.398Z,sneha.singh4@bank.example,login,10.137.78.60,Windows-6781,Patna,,,,,,normal,
+2026-10-06T02:09:41.602Z,sneha.singh4@bank.example,transfer,10.137.78.60,Windows-6781,Patna,11500,,112961093406,,,normal,
+2026-10-06T03:15:33.220Z,vihaan.patel36@bank.example,login,10.140.27.21,Windows-4102,Hyderabad,,,,,,normal,
+2026-10-06T03:20:10.451Z,vihaan.patel36@bank.example,transfer,10.140.27.21,Windows-4102,Hyderabad,3650,,348329581599,,,normal,
+2026-10-06T04:10:44.912Z,kunal.joshi60@bank.example,login,10.77.225.233,iPhone-5926,Bengaluru,,,,,,normal,
+2026-10-06T04:14:19.551Z,kunal.joshi60@bank.example,download,10.77.225.233,iPhone-5926,Bengaluru,,219040,,,Monthly statement,normal,
+2026-10-06T05:25:30.812Z,arjun.joshi18@bank.example,login,10.10.175.191,Windows-2565,Indore,,,,,,normal,
+2026-10-06T05:30:12.449Z,arjun.joshi18@bank.example,transfer,10.10.175.191,Windows-2565,Indore,4800,,596001221309,,,normal,
+2026-10-06T06:15:20.198Z,diya.mehta2@bank.example,login,10.175.172.83,Windows-5217,Kolkata,,,,,,normal,
+2026-10-06T06:19:44.601Z,diya.mehta2@bank.example,transfer,10.175.172.83,Windows-5217,Kolkata,1980,,139268200681,,,normal,
+2026-10-06T07:11:05.312Z,rohan.khan56@bank.example,login,10.148.99.198,Linux-9362,Patna,,,,,,normal,
+2026-10-06T07:15:40.890Z,rohan.khan56@bank.example,transfer,10.148.99.198,Linux-9362,Patna,6450,,663081303215,,,normal,
+2026-10-06T08:04:19.711Z,kavya.joshi47@bank.example,login,10.65.46.40,Windows-3209,Kolkata,,,,,,normal,
+2026-10-06T08:08:50.229Z,kavya.joshi47@bank.example,transfer,10.65.46.40,Windows-3209,Kolkata,7800,,294868955551,,,normal,
+2026-10-06T09:12:00.119Z,vihaan.sharma73@bank.example,transfer,10.31.134.152,Windows-2605,Indore,49200,,912048551920,,,mule_transfers,mule-21
+2026-10-06T09:13:30.119Z,vihaan.sharma73@bank.example,transfer,10.31.134.152,Windows-2605,Indore,48950,,381920448102,,,mule_transfers,mule-21
+2026-10-06T09:15:00.119Z,vihaan.sharma73@bank.example,transfer,10.31.134.152,Windows-2605,Indore,47500,,194028447192,,,mule_transfers,mule-21
+2026-10-06T09:16:30.119Z,vihaan.sharma73@bank.example,transfer,10.31.134.152,Windows-2605,Indore,49800,,883910294101,,,mule_transfers,mule-21
+2026-10-06T09:18:00.119Z,vihaan.sharma73@bank.example,transfer,10.31.134.152,Windows-2605,Indore,46200,,571920482910,,,mule_transfers,mule-21
+2026-10-06T09:19:30.119Z,vihaan.sharma73@bank.example,transfer,10.31.134.152,Windows-2605,Indore,48100,,741029481922,,,mule_transfers,mule-21
+2026-10-06T10:15:20.405Z,arjun.patel76@bank.example,login,10.135.7.210,Linux-6757,Pune,,,,,,normal,
+2026-10-06T10:19:44.112Z,arjun.patel76@bank.example,download,10.135.7.210,Linux-6757,Pune,,245100,,,Monthly statement,normal,
+2026-10-06T11:40:12.784Z,yash.reddy46@bank.example,login,10.77.147.201,Windows-2178,Bengaluru,,,,,,normal,
+2026-10-06T11:44:50.310Z,yash.reddy46@bank.example,transfer,10.77.147.201,Windows-2178,Bengaluru,2400,,841639363742,,,normal,
+2026-10-06T13:22:10.518Z,kunal.bose27@bank.example,login,10.117.136.103,MacBook-3114,Bengaluru,,,,,,normal,
+2026-10-06T13:26:40.912Z,kunal.bose27@bank.example,transfer,10.117.136.103,MacBook-3114,Bengaluru,8200,,273926478787,,,normal,
+2026-10-06T15:10:15.822Z,nisha.reddy53@bank.example,login,10.222.53.140,Android-5340,Chennai,,,,,,normal,
+2026-10-06T15:14:30.419Z,nisha.reddy53@bank.example,transfer,10.222.53.140,Android-5340,Chennai,3150,,744297816441,,,normal,
+2026-10-06T21:44:19.805Z,saanvi.patel13@bank.example,download,194.38.20.19,Windows-5898,Ahmedabad,,1428951040,,,Export all records for Saanvi Patel,data_exfiltration,exfil-25
