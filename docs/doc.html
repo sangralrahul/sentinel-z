@@ -1,0 +1,535 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Sentinel-Z · Design and Solution Document</title>
+<style>
+@font-face { font-family: Plex; src: url(plex-sans-400.woff2); font-weight: 400; }
+@font-face { font-family: Plex; src: url(plex-sans-500.woff2); font-weight: 500; }
+@font-face { font-family: Plex; src: url(plex-sans-600.woff2); font-weight: 600; }
+@font-face { font-family: Plex; src: url(plex-sans-700.woff2); font-weight: 700; }
+@font-face { font-family: PlexMono; src: url(plex-mono-400.woff2); font-weight: 400; }
+@font-face { font-family: PlexMono; src: url(plex-mono-500.woff2); font-weight: 500; }
+@page { size: A4; margin: 0; }
+:root { --ink: #0f1115; --ink2: #3b414b; --mute: #6b7280; --line: #e3e5e9; --soft: #f5f6f8; --blue: #0f62fe; --blue-soft: #edf3ff; --red: #d0353b; --amber: #e0761e; --green: #148a4b; }
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body { font: 400 10.2pt/1.55 Plex, sans-serif; color: var(--ink); -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+.mono { font-family: PlexMono, monospace; font-size: .92em; }
+.page { width: 210mm; height: 297mm; padding: 20mm 18mm 18mm; position: relative; page-break-after: always; overflow: hidden; }
+.page:last-child { page-break-after: auto; }
+.hdr { position: absolute; top: 9mm; left: 18mm; right: 18mm; display: flex; justify-content: space-between; font-size: 7.6pt; color: var(--mute); letter-spacing: .02em; }
+.ftr { position: absolute; bottom: 8mm; left: 18mm; right: 18mm; display: flex; justify-content: space-between; font-size: 7.6pt; color: var(--mute); border-top: 1px solid var(--line); padding-top: 3mm; }
+.kicker { font: 500 8.4pt PlexMono, monospace; color: var(--blue); letter-spacing: .04em; text-transform: uppercase; }
+h1 { font-size: 20pt; line-height: 1.12; letter-spacing: -.02em; margin: 2mm 0 4mm; font-weight: 600; }
+h2 { font-size: 13pt; margin: 7mm 0 2.5mm; font-weight: 600; letter-spacing: -.01em; }
+h3 { font-size: 10.6pt; margin: 4mm 0 1.5mm; font-weight: 600; }
+p { margin: 0 0 2.6mm; color: var(--ink2); }
+.lead { font-size: 10.6pt; line-height: 1.55; color: var(--ink2); }
+ul, ol { margin: 0 0 3mm; padding-left: 5mm; color: var(--ink2); }
+li { margin: 0 0 1.2mm; }
+b, strong { color: var(--ink); font-weight: 600; }
+table { width: 100%; border-collapse: collapse; font-size: 9pt; margin: 1mm 0 3mm; }
+th { text-align: left; font-weight: 600; background: var(--soft); padding: 2mm 2.6mm; border-bottom: 1px solid var(--line); }
+td { padding: 1.8mm 2.6mm; border-bottom: 1px solid var(--line); vertical-align: top; color: var(--ink2); }
+td.r, th.r { text-align: right; font-variant-numeric: tabular-nums; }
+tr.hl td { background: var(--blue-soft); color: var(--ink); font-weight: 600; }
+.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 6mm; }
+.grid3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4mm; }
+.card { border: 1px solid var(--line); border-radius: 3mm; padding: 3.2mm 3.6mm; background: #fff; }
+.card h3 { margin-top: 0; }
+.card p { font-size: 8.8pt; line-height: 1.5; margin: 0; }
+.stats { display: grid; grid-template-columns: repeat(4, 1fr); border: 1px solid var(--line); border-radius: 3mm; overflow: hidden; margin: 4mm 0; }
+.stats div { padding: 4mm; border-left: 1px solid var(--line); }
+.stats div:first-child { border-left: 0; }
+.stats b { display: block; font-size: 17pt; letter-spacing: -.02em; line-height: 1.1; }
+.stats span { font-size: 8.2pt; color: var(--mute); }
+.stats .g b { color: var(--green); }
+.callout { border-left: 3px solid var(--blue); background: var(--blue-soft); padding: 3mm 4mm; border-radius: 0 2mm 2mm 0; font-size: 9.2pt; color: var(--ink2); margin: 3mm 0; }
+.callout.warn { border-color: var(--amber); background: #fff5ec; }
+.shot { border: 1px solid var(--line); border-radius: 2.5mm; overflow: hidden; margin: 2mm 0 1.5mm; }
+.shot img { display: block; width: 100%; }
+.cap { font-size: 8.2pt; color: var(--mute); margin-bottom: 4mm; }
+.formula { font: 500 10pt PlexMono, monospace; background: var(--soft); border: 1px solid var(--line); border-radius: 2mm; padding: 3mm 4mm; margin: 2mm 0 3mm; }
+.tag { display: inline-block; font: 500 7.6pt PlexMono, monospace; padding: .4mm 2mm; border-radius: 1.2mm; background: var(--blue-soft); color: var(--blue); }
+.num { display: inline-grid; place-items: center; width: 6mm; height: 6mm; border-radius: 50%; background: var(--ink); color: #fff; font-size: 8pt; font-weight: 600; margin-right: 2mm; }
+svg text { font-family: Plex, sans-serif; }
+
+/* Cover */
+.cover { background: #08090a; color: #f7f8f8; padding: 0; }
+.cover .in { position: absolute; inset: 0; padding: 22mm 18mm; display: flex; flex-direction: column; }
+.cover .glow { position: absolute; inset: -30% -20% auto; height: 160mm; background: radial-gradient(ellipse 50% 45% at 50% 50%, rgba(76,141,255,.28), transparent 70%); }
+.cover .brand { display: flex; align-items: center; gap: 3mm; font-weight: 600; font-size: 13pt; position: relative; }
+.cover .pill { position: relative; display: inline-flex; gap: 2.5mm; align-items: center; margin-top: 22mm; align-self: flex-start; border: 1px solid rgba(255,255,255,.18); border-radius: 99px; padding: 1.2mm 3.5mm 1.2mm 1.2mm; font-size: 8.6pt; color: #d0d6e0; }
+.cover .pill b { background: #f7f8f8; color: #08090a; padding: .8mm 2.6mm; border-radius: 99px; font-size: 8pt; }
+.cover h1 { position: relative; font-size: 34pt; line-height: 1.04; letter-spacing: -.035em; margin: 7mm 0 5mm; color: #fff; }
+.cover h1 span { color: #a7adb9; }
+.cover .sub { position: relative; font-size: 12pt; line-height: 1.55; color: #9aa0aa; max-width: 150mm; }
+.cover .doc { position: relative; margin-top: 8mm; font: 500 9pt PlexMono, monospace; color: #4c8dff; letter-spacing: .05em; text-transform: uppercase; }
+.cover .shot { position: relative; margin-top: 10mm; border-color: rgba(255,255,255,.14); box-shadow: 0 20mm 40mm -15mm rgba(76,141,255,.35); }
+.cover .meta { position: relative; margin-top: auto; display: grid; grid-template-columns: repeat(3, 1fr); gap: 6mm; border-top: 1px solid rgba(255,255,255,.12); padding-top: 5mm; font-size: 8.6pt; color: #9aa0aa; }
+.cover .meta b { display: block; color: #f7f8f8; font-weight: 500; margin-bottom: .6mm; }
+</style>
+</head>
+<body>
+
+<!-- 1. COVER -->
+<section class="page cover">
+  <div class="glow"></div>
+  <div class="in">
+    <div class="brand"><svg width="26" height="26" viewBox="0 0 32 32"><path d="M16 2 4 7v8c0 7.5 5.1 13.4 12 15 6.9-1.6 12-7.5 12-15V7z" fill="#f7f8f8"/><path d="M11 11h10l-10 10h10" fill="none" stroke="#08090a" stroke-width="2.6" stroke-linecap="square"/></svg>Sentinel-Z</div>
+    <span class="pill"><b>IBM Z Datathon 2026</b>Challenge 2 · AI Secured: Innovation Without Exposure</span>
+    <h1>Fraud detection that never<br><span>sees who the customer is</span></h1>
+    <p class="sub">Privacy-preserving anomaly detection for banking security logs. Identities are pseudonymised before the model sees a single row, every alert is explained in plain words, and the whole engine runs where the data already lives, on IBM Z.</p>
+    <div class="doc">Design and Solution Document · v1.0 · October 2026</div>
+    <div class="shot"><img src="hero.jpg" alt="Sentinel-Z home page"></div>
+    <div class="meta">
+      <div><b>Team</b>Bitverse</div>
+      <div><b>Live demo</b>sentinel-z-eight.vercel.app</div>
+      <div><b>Source code</b>github.com/sangralrahul/sentinel-z</div>
+    </div>
+  </div>
+</section>
+
+<!-- 2. EXECUTIVE SUMMARY -->
+<section class="page">
+  <div class="hdr"><span>Sentinel-Z · Design and Solution Document</span><span>Team Bitverse</span></div>
+  <span class="kicker">01 · Executive summary</span>
+  <h1>AI on the most sensitive data a bank has, without exposing any of it</h1>
+  <p class="lead">Login, transfer and download logs are where account takeovers, mule networks and data theft first show up, and they are full of personal data. Shipping them to an external AI service creates exactly the exposure a security team exists to prevent. <b>Sentinel-Z</b> removes identity before analysis and keeps the analysis next to the data: a zero-dependency engine that runs identically in a browser tab, on a server, or on Linux on IBM Z / LinuxONE.</p>
+
+  <div class="stats">
+    <div><b>0.998</b><span>ROC-AUC on the synthetic bank</span></div>
+    <div class="g"><b>26 / 26</b><span>Injected attacks caught</span></div>
+    <div><b>94.2%</b><span>Recall at 1.55% false-alarm rate</span></div>
+    <div class="g"><b>0</b><span>Requests to any external server</span></div>
+  </div>
+
+  <h2>What the solution delivers</h2>
+  <div class="grid2" style="gap:4mm">
+    <div class="card"><h3>Privacy by construction</h3><p>Keyed HMAC-SHA256 pseudonyms for every identifier, PII masking in free text (email, phone, Luhn-checked cards, Aadhaar, PAN, IP), and differential privacy (ε = 1) for anything shared outside the security team.</p></div>
+    <div class="card"><h3>Detection that explains itself</h3><p>A from-scratch Isolation Forest combined with expert rules catches seven attack types. Every alert carries plain-English reasons and MITRE ATT&amp;CK techniques, grouped into incidents.</p></div>
+    <div class="card"><h3>An analyst's console</h3><p>Triage workflow, customer risk timelines, day × hour heat map, a red-team attack simulator, a what-if threshold slider, and a printable, pseudonymised incident report.</p></div>
+    <div class="card"><h3>Built for IBM Z</h3><p>No native modules and no dependencies, so it runs unchanged on <span class="mono">linux/s390x</span>. A multi-arch container is built and tested for s390x in CI; optional summaries come from IBM Granite running locally.</p></div>
+  </div>
+
+  <h2>How it meets the challenge</h2>
+  <table style="font-size:8.6pt">
+    <tr><th style="width:36%">Challenge requirement</th><th>Sentinel-Z</th></tr>
+    <tr><td><b>Innovation:</b> useful AI on security data</td><td>Hybrid unsupervised + rule detection, explainable alerts, incident grouping, ATT&amp;CK mapping, self red-teaming</td></tr>
+    <tr><td><b>Without exposure:</b> no leak of sensitive data</td><td>Pseudonymise and redact before analysis; no cloud calls; browser Content-Security-Policy blocks uploads; DP for sharing</td></tr>
+    <tr><td><b>Evidence</b> it works</td><td>ROC-AUC, precision/recall, confusion matrix, per-attack recall and ablation, reproducible across seeds, enforced by 14 automated tests</td></tr>
+    <tr><td><b>IBM Z</b> relevance</td><td>Runs on s390x next to core banking data; CI-tested s390x image; local IBM Granite; path to the Integrated Accelerator for AI</td></tr>
+  </table>
+  <div class="ftr"><span>sentinel-z-eight.vercel.app</span><span>2</span></div>
+</section>
+
+<!-- 3. PROBLEM + ARCHITECTURE -->
+<section class="page">
+  <div class="hdr"><span>Sentinel-Z · Design and Solution Document</span><span>Team Bitverse</span></div>
+  <span class="kicker">02 · Problem and architecture</span>
+  <h1>The privacy paradox in security analytics</h1>
+  <div class="grid2">
+    <div>
+      <h3>Why existing approaches fall short</h3>
+      <ul>
+        <li><b>Cloud AI services</b> need the raw logs, moving customer data outside the bank's control and across borders.</li>
+        <li><b>Static rule engines</b> are private but blind to anything nobody wrote a rule for, such as quiet insider misuse.</li>
+        <li><b>Black-box scores</b> are hard to act on and hard to defend to auditors and regulators.</li>
+        <li><b>Plain hashing</b> of identifiers is reversible by hashing a list of known emails or phone numbers.</li>
+      </ul>
+    </div>
+    <div>
+      <h3>Design principles</h3>
+      <ol>
+        <li><b>Remove identity first.</b> Nothing downstream ever sees a raw identifier.</li>
+        <li><b>Learn, don't label.</b> Baselines come from history, so no labelled attacks are needed.</li>
+        <li><b>Explain every alert.</b> Reasons an analyst can verify in seconds.</li>
+        <li><b>Run where the data lives.</b> Zero dependencies, any architecture, no network.</li>
+        <li><b>Measure honestly.</b> Publish the metrics and the limits.</li>
+      </ol>
+    </div>
+  </div>
+
+  <h2>System architecture</h2>
+  <svg viewBox="0 0 680 330" width="100%" style="display:block;margin:2mm 0 1mm">
+    <defs><marker id="ar" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#6b7280"/></marker></defs>
+    <rect x="1" y="1" width="678" height="328" rx="10" fill="#fafbfc" stroke="#e3e5e9"/>
+    <text x="16" y="22" font-size="10" fill="#6b7280" font-weight="600" letter-spacing=".06em">TRUST BOUNDARY · BANK INFRASTRUCTURE (IBM Z / LINUXONE OR ANALYST BROWSER)</text>
+    <!-- sources -->
+    <g font-size="10.5">
+      <rect x="16" y="42" width="112" height="190" rx="8" fill="#fff" stroke="#c9ced6"/>
+      <text x="72" y="62" text-anchor="middle" font-weight="600" fill="#0f1115">Raw security logs</text>
+      <text x="72" y="84" text-anchor="middle" fill="#3b414b">Logins / failures</text>
+      <text x="72" y="102" text-anchor="middle" fill="#3b414b">Transfers</text>
+      <text x="72" y="120" text-anchor="middle" fill="#3b414b">Downloads</text>
+      <text x="72" y="138" text-anchor="middle" fill="#3b414b">IP · device · city</text>
+      <text x="72" y="156" text-anchor="middle" fill="#3b414b">Free-text notes</text>
+      <text x="72" y="190" text-anchor="middle" fill="#d0353b" font-size="9.5">contains PII</text>
+      <text x="72" y="206" text-anchor="middle" fill="#6b7280" font-size="9">CSV / JSON</text>
+    </g>
+    <line x1="128" y1="137" x2="150" y2="137" stroke="#6b7280" stroke-width="1.4" marker-end="url(#ar)"/>
+    <!-- privacy layer -->
+    <rect x="152" y="42" width="128" height="190" rx="8" fill="#0f1115"/>
+    <text x="216" y="62" text-anchor="middle" font-weight="600" fill="#fff" font-size="11">1 · Privacy layer</text>
+    <g font-size="9.6" fill="#c9ced6">
+      <text x="216" y="86" text-anchor="middle">HMAC-SHA256 pseudonyms</text>
+      <text x="216" y="102" text-anchor="middle">usr_ · ip_ · dev_ · acc_</text>
+      <text x="216" y="124" text-anchor="middle">PII redaction</text>
+      <text x="216" y="140" text-anchor="middle">email · phone · card (Luhn)</text>
+      <text x="216" y="156" text-anchor="middle">Aadhaar · PAN · IP</text>
+      <text x="216" y="182" text-anchor="middle">raw values dropped</text>
+      <text x="216" y="206" text-anchor="middle" fill="#4c8dff">key in memory only</text>
+    </g>
+    <line x1="280" y1="137" x2="302" y2="137" stroke="#6b7280" stroke-width="1.4" marker-end="url(#ar)"/>
+    <!-- engine -->
+    <rect x="304" y="42" width="226" height="190" rx="8" fill="#fff" stroke="#0f62fe" stroke-width="1.4"/>
+    <text x="417" y="62" text-anchor="middle" font-weight="600" fill="#0f1115" font-size="11">Detection engine (pseudonymised data only)</text>
+    <rect x="316" y="74" width="98" height="64" rx="6" fill="#edf3ff"/>
+    <text x="365" y="92" text-anchor="middle" font-size="10" font-weight="600" fill="#0f1115">2 · Baseline</text>
+    <text x="365" y="108" text-anchor="middle" font-size="9" fill="#3b414b">per-customer</text>
+    <text x="365" y="122" text-anchor="middle" font-size="9" fill="#3b414b">10 features</text>
+    <rect x="420" y="74" width="98" height="64" rx="6" fill="#edf3ff"/>
+    <text x="469" y="92" text-anchor="middle" font-size="10" font-weight="600" fill="#0f1115">3 · Score</text>
+    <text x="469" y="108" text-anchor="middle" font-size="9" fill="#3b414b">Isolation Forest</text>
+    <text x="469" y="122" text-anchor="middle" font-size="9" fill="#3b414b">+ expert rules</text>
+    <rect x="316" y="148" width="202" height="72" rx="6" fill="#edf3ff"/>
+    <text x="417" y="166" text-anchor="middle" font-size="10" font-weight="600" fill="#0f1115">4 · Explain and group</text>
+    <text x="417" y="183" text-anchor="middle" font-size="9" fill="#3b414b">plain-English reasons · ATT&amp;CK IDs</text>
+    <text x="417" y="198" text-anchor="middle" font-size="9" fill="#3b414b">incidents per customer (2 h window)</text>
+    <text x="417" y="212" text-anchor="middle" font-size="9" fill="#3b414b">critical / high / medium</text>
+    <line x1="530" y1="137" x2="552" y2="137" stroke="#6b7280" stroke-width="1.4" marker-end="url(#ar)"/>
+    <!-- outputs -->
+    <g font-size="9.6">
+      <rect x="554" y="42" width="112" height="56" rx="8" fill="#fff" stroke="#c9ced6"/>
+      <text x="610" y="62" text-anchor="middle" font-weight="600" fill="#0f1115">Analyst console</text>
+      <text x="610" y="78" text-anchor="middle" fill="#3b414b">triage · simulator</text>
+      <text x="610" y="91" text-anchor="middle" fill="#3b414b">what-if · timeline</text>
+      <rect x="554" y="108" width="112" height="56" rx="8" fill="#fff" stroke="#c9ced6"/>
+      <text x="610" y="128" text-anchor="middle" font-weight="600" fill="#0f1115">Incident report</text>
+      <text x="610" y="144" text-anchor="middle" fill="#3b414b">pseudonymised</text>
+      <text x="610" y="157" text-anchor="middle" fill="#3b414b">JSON · print / PDF</text>
+      <rect x="554" y="174" width="112" height="58" rx="8" fill="#fff" stroke="#148a4b"/>
+      <text x="610" y="194" text-anchor="middle" font-weight="600" fill="#0f1115">5 · Share safely</text>
+      <text x="610" y="210" text-anchor="middle" fill="#3b414b">Laplace noise ε = 1</text>
+      <text x="610" y="223" text-anchor="middle" fill="#3b414b">auditors, other teams</text>
+    </g>
+    <!-- local LLM -->
+    <rect x="304" y="252" width="226" height="56" rx="8" fill="#fff" stroke="#c9ced6" stroke-dasharray="4 3"/>
+    <text x="417" y="272" text-anchor="middle" font-size="10" font-weight="600" fill="#0f1115">Optional: IBM Granite (local, Ollama)</text>
+    <text x="417" y="288" text-anchor="middle" font-size="9" fill="#3b414b">analyst summaries from pseudonymised incidents</text>
+    <text x="417" y="300" text-anchor="middle" font-size="9" fill="#3b414b">localhost / private network only, refused otherwise</text>
+    <line x1="417" y1="232" x2="417" y2="250" stroke="#6b7280" stroke-width="1.2" stroke-dasharray="3 3" marker-end="url(#ar)"/>
+    <rect x="16" y="252" width="264" height="56" rx="8" fill="#fff5ec" stroke="#f0c9a3"/>
+    <text x="148" y="272" text-anchor="middle" font-size="10" font-weight="600" fill="#0f1115">No path to the outside</text>
+    <text x="148" y="288" text-anchor="middle" font-size="9" fill="#3b414b">no cloud APIs · CSP connect-src 'self'</text>
+    <text x="148" y="300" text-anchor="middle" font-size="9" fill="#3b414b">live external-request counter in the UI</text>
+  </svg>
+  <p class="cap">Figure 1. Data flow. Raw identifiers exist only to the left of the privacy layer; everything to the right handles pseudonyms, and nothing crosses the trust boundary.</p>
+
+  <h3>Deployment modes (same engine)</h3>
+  <table>
+    <tr><th>Mode</th><th>Where it runs</th><th>Typical use</th></tr>
+    <tr><td><b>Browser console</b></td><td>Analyst's browser; analysis in a Web Worker</td><td>Investigation, demos, ad-hoc files up to 50 MB</td></tr>
+    <tr><td><b>Command line</b></td><td>Any Node 18+ host, including LinuxONE</td><td>Batch scoring, scheduled jobs, reports</td></tr>
+    <tr><td><b>Container</b></td><td>Multi-arch image (amd64, arm64, s390x)</td><td>Run on IBM Z next to core banking systems</td></tr>
+  </table>
+  <div class="ftr"><span>sentinel-z-eight.vercel.app</span><span>3</span></div>
+</section>
+
+<!-- 4. PRIVACY -->
+<section class="page">
+  <div class="hdr"><span>Sentinel-Z · Design and Solution Document</span><span>Team Bitverse</span></div>
+  <span class="kicker">03 · Privacy design</span>
+  <h1>Four layers of protection, each tested on every commit</h1>
+
+  <div class="grid2">
+    <div>
+      <h3><span class="num">1</span>Keyed pseudonymisation</h3>
+      <p>Each identifier becomes <span class="mono">prefix_ + first 12 hex of HMAC-SHA256(key, kind ‖ value)</span>. The same customer always maps to the same token under one key, so behaviour can be learned, but without the key the token cannot be reversed or matched against a list of known emails.</p>
+      <div class="formula">priya.sharma4@bank.example<br>→ usr_8506020624e6</div>
+      <h3><span class="num">2</span>PII redaction in free text</h3>
+      <p>Notes are scanned for emails, phone numbers (including spaced formats), card numbers (validated with the Luhn checksum so invoice numbers survive), Aadhaar, PAN and IP addresses.</p>
+      <div class="formula">"call +91 98765 43210, card 4111 1111 1111 1111"<br>→ "call [PHONE], card [CARD]"</div>
+    </div>
+    <div>
+      <h3><span class="num">3</span>Differential privacy for sharing</h3>
+      <p>Counts sent to auditors or other teams (events, alerts, incidents, alerts per signal) carry Laplace noise with ε = 1. Exact figures never leave the security team.</p>
+      <h3><span class="num">4</span>Proof of no exfiltration</h3>
+      <p>No component calls a cloud API. The website ships a Content-Security-Policy with <span class="mono">connect-src 'self'</span>, so the browser itself refuses to send data elsewhere, and the page counts its own external requests live (always 0).</p>
+      <h3>Key management</h3>
+      <p>The key is never written to disk. In the browser it lives in memory; on servers it comes from <span class="mono">SENTINEL_KEY</span> via the bank's secret manager. The UI shows only an 8-character fingerprint, and a 16-character minimum is enforced.</p>
+    </div>
+  </div>
+
+  <h2>Threat model</h2>
+  <table>
+    <tr><th style="width:38%">Threat</th><th>Mitigation</th></tr>
+    <tr><td>Model or analyst sees customer identities</td><td>Pseudonyms only; re-identification needs the key <i>and</i> the bank's own customer records</td></tr>
+    <tr><td>Dictionary attack on tokens</td><td>Keyed HMAC rather than a plain hash; key length enforced</td></tr>
+    <tr><td>PII hidden in free text</td><td>Pattern redaction with checksum validation</td></tr>
+    <tr><td>Logs sent to an AI provider</td><td>No cloud calls; optional LLM restricted to localhost or private networks</td></tr>
+    <tr><td>A web page silently uploads data</td><td>CSP <span class="mono">connect-src 'self'</span>, plus a live request counter</td></tr>
+    <tr><td>Aggregates reveal individuals</td><td>Laplace mechanism (ε = 1) on everything shared externally</td></tr>
+    <tr><td>Analyst notes or real IDs persisted</td><td>Triage notes and key-holder lookups live in memory and vanish with the tab</td></tr>
+  </table>
+
+  <div class="ftr"><span>sentinel-z-eight.vercel.app</span><span>4</span></div>
+</section>
+
+<!-- 5. DETECTION -->
+<section class="page">
+  <div class="hdr"><span>Sentinel-Z · Design and Solution Document</span><span>Team Bitverse</span></div>
+  <span class="kicker">04 · Detection model</span>
+  <h1>A hybrid that learns normal and knows known attacks</h1>
+  <p>Each customer's first window of history (14 days by default) builds a baseline: usual hour of activity (circular mean), typical transfer and download sizes, known devices, cities and payees. Every later event is described by ten features that measure departure from that baseline or bursts in short windows.</p>
+  <table>
+    <tr><th style="width:24%">Feature</th><th>Meaning</th><th style="width:28%">Catches</th></tr>
+    <tr><td class="mono">hour_dev</td><td>Hours from the customer's usual time</td><td>Off-hours takeover, insiders</td></tr>
+    <tr><td class="mono">amount_z</td><td>Transfer size against the customer's normal</td><td>Fraudulent payments</td></tr>
+    <tr><td class="mono">bytes_z</td><td>Download size against the customer's normal</td><td>Data exfiltration</td></tr>
+    <tr><td class="mono">new_device</td><td>Device never seen in the baseline</td><td>Account takeover</td></tr>
+    <tr><td class="mono">new_city</td><td>City never seen in the baseline</td><td>Takeover, travel</td></tr>
+    <tr><td class="mono">travel_speed</td><td>Speed implied by previous city (haversine)</td><td>Impossible travel</td></tr>
+    <tr><td class="mono">fails_10m</td><td>Failed logins in the last 10 minutes</td><td>Brute force</td></tr>
+    <tr><td class="mono">ip_users_1h</td><td>Distinct customers on one IP in the last hour</td><td>Credential stuffing</td></tr>
+    <tr><td class="mono">txn_10m</td><td>Transfers in the last 10 minutes</td><td>Mule transfers</td></tr>
+    <tr><td class="mono">new_beneficiary</td><td>Payment to an account never paid before</td><td>Takeover, mules</td></tr>
+  </table>
+
+  <div class="grid2">
+    <div>
+      <h3>Unsupervised model</h3>
+      <p>An <b>Isolation Forest</b> written from scratch (150 trees, sample size 256, seeded for reproducibility) is fitted on baseline events only. Its anomaly score is normalised between the baseline median and 99.9th percentile.</p>
+      <h3>Expert evidence</h3>
+      <p>Known indicators (impossible travel, brute force, shared IP, large amounts, bursts, large downloads, new payee, new device or city, odd hour) carry weights and combine as independent evidence.</p>
+    </div>
+    <div>
+      <h3>Hybrid risk and threshold</h3>
+      <div class="formula">rules = 1 − ∏ (1 − wᵢ / 12)<br>risk  = 1 − (1 − 0.85·model)(1 − rules)</div>
+      <p>The alert threshold is the 99.5th percentile of <i>baseline</i> risk (never below 0.5), so it adapts to each bank instead of being a magic number. Sensitivity presets: strict 99.8, balanced 99.5, sensitive 99.0.</p>
+      <h3>Severity and incidents</h3>
+      <p><b>Critical</b>: risk ≥ 0.9 or a high-weight indicator. <b>High</b>: risk ≥ 0.75. Otherwise medium. Alerts for one customer within 2 hours form a single incident.</p>
+    </div>
+  </div>
+  <div class="callout">Why hybrid: rules are excellent at known patterns but blind to the unexpected; an unsupervised model sees novelty but cannot spot a pattern it never varies on in training (for example, a brand-new city). Together they cover each other's gaps, and the ablation on the next page shows it.</div>
+  <div class="ftr"><span>sentinel-z-eight.vercel.app</span><span>5</span></div>
+</section>
+
+<!-- 6. EVALUATION -->
+<section class="page">
+  <div class="hdr"><span>Sentinel-Z · Design and Solution Document</span><span>Team Bitverse</span></div>
+  <span class="kicker">05 · Evaluation</span>
+  <h1>Measured, reproducible, and honest about its limits</h1>
+  <p style="font-size:9.4pt">Test set: a synthetic bank of 80 customers over 21 days (5,996 events). The first 14 days are the baseline; the last 7 contain 26 injected attack campaigns of 7 types plus legitimate surprises (real trips, new phones, one-off large payments) that create false-alarm pressure.</p>
+
+  <div class="grid2">
+    <div>
+      <table>
+        <tr><th>Metric</th><th class="r">Value</th></tr>
+        <tr><td>ROC-AUC</td><td class="r"><b>0.998</b></td></tr>
+        <tr><td>Precision</td><td class="r">78.5% (113 / 144)</td></tr>
+        <tr><td>Recall</td><td class="r">94.2% (113 / 120)</td></tr>
+        <tr><td>False-alarm rate</td><td class="r">1.55% (31 / 2,005)</td></tr>
+        <tr><td>F1</td><td class="r">0.856</td></tr>
+        <tr><td>Attack campaigns caught</td><td class="r"><b>26 / 26</b></td></tr>
+        <tr><td>Analysis time, 6,000 events</td><td class="r">≈ 0.3 s</td></tr>
+      </table>
+    </div>
+    <div>
+      <table>
+        <tr><th></th><th class="r">Flagged</th><th class="r">Not flagged</th></tr>
+        <tr><td><b>Attack</b></td><td class="r">113 caught</td><td class="r">7 missed</td></tr>
+        <tr><td><b>Normal</b></td><td class="r">31 false alarms</td><td class="r">1,974 quiet</td></tr>
+      </table>
+      <p style="font-size:9pt">Confusion matrix at threshold 0.782. Results hold across seeds 7, 11 and 23 (hybrid AUC 0.997–0.998, every campaign caught).</p>
+    </div>
+  </div>
+
+  <h2>Ablation: both halves matter</h2>
+  <table>
+    <tr><th>Scorer</th><th class="r">ROC-AUC</th><th class="r">Precision</th><th class="r">Recall</th><th class="r">F1</th></tr>
+    <tr><td>Isolation Forest only</td><td class="r">0.951</td><td class="r">81.8%</td><td class="r">67.5%</td><td class="r">0.740</td></tr>
+    <tr><td>Rules only</td><td class="r">0.996</td><td class="r">87.9%</td><td class="r">85.0%</td><td class="r">0.864</td></tr>
+    <tr class="hl"><td>Hybrid (used)</td><td class="r">0.998</td><td class="r">78.5%</td><td class="r">94.2%</td><td class="r">0.856</td></tr>
+  </table>
+
+  <h3>Recall by attack type (events detected)</h3>
+  <svg viewBox="0 0 680 236" width="88%" style="display:block;margin:0 auto">
+        <g font-size="10">
+      <!-- legend -->
+      <rect x="190" y="2" width="10" height="10" rx="2" fill="#2a78d6"/><text x="205" y="11" fill="#3b414b">Isolation Forest only</text>
+      <rect x="320" y="2" width="10" height="10" rx="2" fill="#eb6834"/><text x="335" y="11" fill="#3b414b">Rules only</text>
+      <rect x="405" y="2" width="10" height="10" rx="2" fill="#1baf7a"/><text x="420" y="11" fill="#3b414b">Hybrid</text>
+    </g>
+    <text x="160" y="40" text-anchor="end" font-size="10" fill="#3b414b">Credential stuffing</text>
+<rect x="170" y="24" width="377.1" height="7" rx="2" fill="#2a78d6"/>
+<text x="552.1" y="30.5" font-size="8" fill="#6b7280">24/28</text>
+<rect x="170" y="33" width="440.0" height="7" rx="2" fill="#eb6834"/>
+<text x="615.0" y="39.5" font-size="8" fill="#6b7280">28/28</text>
+<rect x="170" y="42" width="440.0" height="7" rx="2" fill="#1baf7a"/>
+<text x="615.0" y="48.5" font-size="8" fill="#6b7280">28/28</text>
+<text x="160" y="70" text-anchor="end" font-size="10" fill="#3b414b">Account takeover</text>
+<rect x="170" y="54" width="275.0" height="7" rx="2" fill="#2a78d6"/>
+<text x="450.0" y="60.5" font-size="8" fill="#6b7280">5/8</text>
+<rect x="170" y="63" width="440.0" height="7" rx="2" fill="#eb6834"/>
+<text x="615.0" y="69.5" font-size="8" fill="#6b7280">8/8</text>
+<rect x="170" y="72" width="385.0" height="7" rx="2" fill="#1baf7a"/>
+<text x="560.0" y="78.5" font-size="8" fill="#6b7280">7/8</text>
+<text x="160" y="100" text-anchor="end" font-size="10" fill="#3b414b">Brute force</text>
+<rect x="170" y="84" width="233.8" height="7" rx="2" fill="#2a78d6"/>
+<text x="408.8" y="90.5" font-size="8" fill="#6b7280">17/32</text>
+<rect x="170" y="93" width="440.0" height="7" rx="2" fill="#eb6834"/>
+<text x="615.0" y="99.5" font-size="8" fill="#6b7280">32/32</text>
+<rect x="170" y="102" width="440.0" height="7" rx="2" fill="#1baf7a"/>
+<text x="615.0" y="108.5" font-size="8" fill="#6b7280">32/32</text>
+<text x="160" y="130" text-anchor="end" font-size="10" fill="#3b414b">Insider misuse (no rule)</text>
+<rect x="170" y="114" width="330.0" height="7" rx="2" fill="#2a78d6"/>
+<text x="505.0" y="120.5" font-size="8" fill="#6b7280">15/20</text>
+<rect x="170" y="123" width="132.0" height="7" rx="2" fill="#eb6834"/>
+<text x="307.0" y="129.5" font-size="8" fill="#6b7280">6/20</text>
+<rect x="170" y="132" width="352.0" height="7" rx="2" fill="#1baf7a"/>
+<text x="527.0" y="138.5" font-size="8" fill="#6b7280">16/20</text>
+<text x="160" y="160" text-anchor="end" font-size="10" fill="#3b414b">Impossible travel</text>
+<rect x="170" y="144" width="1.5" height="7" rx="2" fill="#2a78d6"/>
+<text x="176.5" y="150.5" font-size="8" fill="#6b7280">0/5</text>
+<rect x="170" y="153" width="440.0" height="7" rx="2" fill="#eb6834"/>
+<text x="615.0" y="159.5" font-size="8" fill="#6b7280">5/5</text>
+<rect x="170" y="162" width="440.0" height="7" rx="2" fill="#1baf7a"/>
+<text x="615.0" y="168.5" font-size="8" fill="#6b7280">5/5</text>
+<text x="160" y="190" text-anchor="end" font-size="10" fill="#3b414b">Mule transfers</text>
+<rect x="170" y="174" width="311.7" height="7" rx="2" fill="#2a78d6"/>
+<text x="486.7" y="180.5" font-size="8" fill="#6b7280">17/24</text>
+<rect x="170" y="183" width="366.7" height="7" rx="2" fill="#eb6834"/>
+<text x="541.7" y="189.5" font-size="8" fill="#6b7280">20/24</text>
+<rect x="170" y="192" width="403.3" height="7" rx="2" fill="#1baf7a"/>
+<text x="578.3" y="198.5" font-size="8" fill="#6b7280">22/24</text>
+<text x="160" y="220" text-anchor="end" font-size="10" fill="#3b414b">Data exfiltration</text>
+<rect x="170" y="204" width="440.0" height="7" rx="2" fill="#2a78d6"/>
+<text x="615.0" y="210.5" font-size="8" fill="#6b7280">3/3</text>
+<rect x="170" y="213" width="440.0" height="7" rx="2" fill="#eb6834"/>
+<text x="615.0" y="219.5" font-size="8" fill="#6b7280">3/3</text>
+<rect x="170" y="222" width="440.0" height="7" rx="2" fill="#1baf7a"/>
+<text x="615.0" y="228.5" font-size="8" fill="#6b7280">3/3</text>
+<line x1="170.0" x2="170.0" y1="20" y2="230" stroke="#e3e5e9" stroke-width="0.6"/>
+<text x="170.0" y="240" text-anchor="middle" font-size="8" fill="#6b7280">0%</text>
+<line x1="280.0" x2="280.0" y1="20" y2="230" stroke="#e3e5e9" stroke-width="0.6"/>
+<text x="280.0" y="240" text-anchor="middle" font-size="8" fill="#6b7280">25%</text>
+<line x1="390.0" x2="390.0" y1="20" y2="230" stroke="#e3e5e9" stroke-width="0.6"/>
+<text x="390.0" y="240" text-anchor="middle" font-size="8" fill="#6b7280">50%</text>
+<line x1="500.0" x2="500.0" y1="20" y2="230" stroke="#e3e5e9" stroke-width="0.6"/>
+<text x="500.0" y="240" text-anchor="middle" font-size="8" fill="#6b7280">75%</text>
+<line x1="610.0" x2="610.0" y1="20" y2="230" stroke="#e3e5e9" stroke-width="0.6"/>
+<text x="610.0" y="240" text-anchor="middle" font-size="8" fill="#6b7280">100%</text>
+  </svg>
+  <div class="callout warn"><b>Honest caveat.</b> The data is synthetic, so these figures show the method works as designed; they are not a claim about live bank traffic. Insider misuse deliberately has <b>no dedicated rule</b>: the model finds 15 of 20 events where rules find 6. Validation on real or public logs (e.g. LANL authentication data) is the first next step.</div>
+  <div class="ftr"><span>sentinel-z-eight.vercel.app</span><span>6</span></div>
+</section>
+
+<!-- 7. PRODUCT -->
+<section class="page">
+  <div class="hdr"><span>Sentinel-Z · Design and Solution Document</span><span>Team Bitverse</span></div>
+  <span class="kicker">06 · Product walkthrough</span>
+  <h1>From alert to decision in one screen</h1>
+  <div class="shot"><img src="console.jpg" alt="Console overview"></div>
+  <p class="cap">Figure 2. Console overview: KPIs, incidents per day by severity, why alerts fired, a day × hour heat map and ATT&amp;CK techniques. Everything shown is pseudonymised.</p>
+  <div class="shot"><img src="incident.jpg" alt="Incident detail"></div>
+  <p class="cap">Figure 3. An incident: triage status and notes, signals with ATT&amp;CK tags, the customer's full activity plotted against the alert threshold, and the per-event split between model and rules.</p>
+  <div class="ftr"><span>sentinel-z-eight.vercel.app</span><span>7</span></div>
+</section>
+
+<!-- 8. PRODUCT 2 -->
+<section class="page">
+  <div class="hdr"><span>Sentinel-Z · Design and Solution Document</span><span>Team Bitverse</span></div>
+  <span class="kicker">06 · Product walkthrough (continued)</span>
+  <h1>A system that tests itself in front of you</h1>
+  <div class="shot"><img src="sim.jpg" alt="Attack simulator verdict"></div>
+  <p class="cap">Figure 4. Red-team simulator: an account takeover injected into a clean synthetic customer is re-scored live and caught as critical, with reasons and every injected event. Six attack types are detected every time; the deliberately subtle low-and-slow insider is sometimes missed, and the app says so.</p>
+  <div class="shot"><img src="whatif.jpg" alt="What-if threshold"></div>
+  <p class="cap">Figure 5. What-if threshold: drag the slider and see alerts, precision, recall, false alarms and missed events change live, with the operating point moving on the ROC curve.</p>
+  <div class="shot"><img src="privacy_c.jpg" alt="Privacy section of the console"></div>
+  <p class="cap">Figure 6. The Privacy section: live external-request counter (always 0), what was pseudonymised or masked, and a playground using the session key.</p>
+  <h3>Other analyst features</h3>
+  <ul>
+    <li><b>Key-holder lookup:</b> type a real customer ID or IP; it is pseudonymised locally with the key and matched, never stored.</li>
+    <li><b>Exports:</b> pseudonymised JSON report, differentially private summary, and a clean printable incident report (Save as PDF).</li>
+    <li><b>Keyboard-first:</b> D demo · 1–6 sections · / search · E export · P print · Esc home. Light and dark themes; reduced-motion respected.</li>
+  </ul>
+  <div class="ftr"><span>sentinel-z-eight.vercel.app</span><span>8</span></div>
+</section>
+
+<!-- 9. IBM Z + ENGINEERING -->
+<section class="page">
+  <div class="hdr"><span>Sentinel-Z · Design and Solution Document</span><span>Team Bitverse</span></div>
+  <span class="kicker">07 · IBM Z deployment and engineering</span>
+  <h1>Runs where the bank already runs</h1>
+  <p>Core banking lives on IBM Z. Because Sentinel-Z is plain JavaScript with zero dependencies and no native modules, the exact same engine runs on <span class="mono">linux/s390x</span> beside the systems of record. Nothing needs to be copied to a cloud AI service, and the platform's isolation, encryption and audit controls apply automatically.</p>
+  <div class="formula" style="font-size:9pt;line-height:1.7">$ docker build -t sentinel-z .                       <span style="color:#6b7280"># multi-arch, tests run during build</span><br>$ docker run --rm -p 5173:5173 sentinel-z             <span style="color:#6b7280"># web console</span><br>$ SENTINEL_KEY=… node cli/sentinel-z.js analyze logs.csv --train-days 14 --out report.json<br>$ ollama pull granite3.3:2b &amp;&amp; node cli/sentinel-z.js analyze logs.csv --explain</div>
+
+  <div class="grid3">
+    <div class="card"><h3>Quality gates</h3><p>14 automated tests: crypto against Node's reference, redaction, model behaviour, end-to-end accuracy thresholds, reproducibility, simulator, CLI, and a check that no raw email or internal IP appears in any output.</p></div>
+    <div class="card"><h3>Continuous integration</h3><p>GitHub Actions runs the suite and the demo on Node 18, 20 and 22, then builds and tests the container for <span class="mono">linux/s390x</span> under QEMU on every push.</p></div>
+    <div class="card"><h3>Secure hosting</h3><p>Static deployment with strict CSP, no-referrer, frame denial and nosniff headers. The image runs as a non-root user. MIT licence; self-hosted IBM Plex fonts.</p></div>
+  </div>
+
+  <h2>Scaling path on IBM Z</h2>
+  <table>
+    <tr><th style="width:28%">Stage</th><th>Approach</th></tr>
+    <tr><td><b>Today</b></td><td>Batch or interactive scoring at ≈ 20,000 events per second per thread; files of any size via the CLI</td></tr>
+    <tr><td><b>Streaming</b></td><td>Score events as they arrive from z/OS or LinuxONE log streams; rolling baselines per customer</td></tr>
+    <tr><td><b>Acceleration</b></td><td>Export the forest for inference on the IBM Z Integrated Accelerator for AI (Telum) for in-transaction scoring</td></tr>
+    <tr><td><b>Feedback</b></td><td>Analyst decisions (false positive, resolved) become known-good patterns that tune thresholds per segment</td></tr>
+  </table>
+
+  <h2>Data sets used</h2>
+  <p>A <b>synthetic banking security log</b> generated by the project (<span class="mono">core/generator.js</span>): 80 customers, 21 days, about 6,000 login, failed-login, transfer and download events with IP, device, city, amount, bytes, beneficiary account and free-text notes. Attacks and legitimate surprises are injected with ground-truth labels and campaign IDs. No real customer data is used; the generator is seeded, so every result is reproducible. The engine accepts any CSV or JSON log with <span class="mono">timestamp, user, event</span> columns, and is ready for public datasets such as LANL authentication logs.</p>
+  <div class="ftr"><span>sentinel-z-eight.vercel.app</span><span>9</span></div>
+</section>
+
+<!-- 10. AUDIENCE + ROADMAP -->
+<section class="page">
+  <div class="hdr"><span>Sentinel-Z · Design and Solution Document</span><span>Team Bitverse</span></div>
+  <span class="kicker">08 · Audience, limitations and roadmap</span>
+  <h1>Who it serves and what comes next</h1>
+  <table>
+    <tr><th style="width:32%">Audience</th><th>Value</th></tr>
+    <tr><td><b>Bank SOC analysts</b></td><td>Prioritised, explained incidents with ATT&amp;CK mapping and triage, without seeing identities</td></tr>
+    <tr><td><b>Fraud and risk teams</b> (banks, NBFCs, payment firms)</td><td>Early detection of account takeover, mule transfers and impossible travel</td></tr>
+    <tr><td><b>CISOs, DPOs, compliance</b></td><td>AI on sensitive logs that respects privacy law (e.g. India's DPDP Act) and data-localisation expectations</td></tr>
+    <tr><td><b>IBM Z platform teams</b></td><td>Detection deployed beside core banking data, no data movement</td></tr>
+    <tr><td><b>Auditors and partners</b></td><td>Differentially private summaries for oversight without exposing individuals</td></tr>
+  </table>
+
+  <div class="grid2">
+    <div>
+      <h2>Known limitations</h2>
+      <ul>
+        <li>Evaluated on synthetic data only.</li>
+        <li>Baselines are static per run.</li>
+        <li>City-level location; no ASN or VPN signals yet.</li>
+        <li>Pseudonyms hide identity, not behaviour; very distinctive patterns can hint at a person, which is why external sharing uses differential privacy.</li>
+      </ul>
+    </div>
+    <div>
+      <h2>Roadmap</h2>
+      <ol>
+        <li>Validate on LANL and partner logs inside the bank.</li>
+        <li>Rolling baselines and analyst feedback loop.</li>
+        <li>Streaming ingestion from z/OS / LinuxONE.</li>
+        <li>Inference on the IBM Z Integrated Accelerator for AI.</li>
+        <li>ASN, VPN and device-fingerprint signals.</li>
+      </ol>
+    </div>
+  </div>
+
+  <h2>Try it</h2>
+  <div class="grid3">
+    <div class="card"><h3>Live demo</h3><p class="mono">sentinel-z-eight.vercel.app</p><p style="margin-top:1.5mm">Press D to open the console with the synthetic bank.</p></div>
+    <div class="card"><h3>Source code</h3><p class="mono">github.com/sangralrahul/sentinel-z</p><p style="margin-top:1.5mm">README, explainer, tests, Dockerfile, CI.</p></div>
+    <div class="card"><h3>Run locally</h3><p class="mono">git clone … &amp;&amp; npm test &amp;&amp; npm start</p><p style="margin-top:1.5mm">Node 18+, nothing to install.</p></div>
+  </div>
+  <p style="margin-top:6mm;font-size:8.6pt;color:#6b7280">Sentinel-Z is original work by Team Bitverse for the IBM Z Datathon 2026, released under the MIT licence. All demo data is synthetic; any resemblance of generated names to real people is coincidental. IBM, IBM Z, LinuxONE and Granite are trademarks of IBM Corp.; MITRE ATT&amp;CK is a trademark of The MITRE Corporation.</p>
+  <div class="ftr"><span>sentinel-z-eight.vercel.app</span><span>10</span></div>
+</section>
+</body>
+</html>

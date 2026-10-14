@@ -145,3 +145,34 @@ test('CLI runs end to end without SENTINEL_KEY (random key path)', async () => {
   assert.match(out, /attacks caught 26\/26/);
   assert.ok(!out.includes('@bank.example'));
 });
+
+test('public-dataset adapters parse PaySim and IEEE-CIS schemas (fixtures, not results)', async () => {
+  const { loadPaySim, loadIEEE, keepCustomer, splitCSVLine } = await import('../cli/datasets.js');
+  const fs = await import('node:fs'); const os = await import('node:os'); const path = await import('node:path');
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'sz-ds-'));
+  // Tiny files with the exact column layout of the real datasets.
+  const ps = ['step,type,amount,nameOrig,oldbalanceOrg,newbalanceOrig,nameDest,oldbalanceDest,newbalanceDest,isFraud,isFlaggedFraud'];
+  for (let i = 0; i < 400; i++) ps.push(`${1 + (i % 50)},${i % 7 === 0 ? 'CASH_IN' : 'PAYMENT'},${100 + i},C${i % 60},${5000 + i},${4900},M${i},0,0,0,0`);
+  ps.push('40,TRANSFER,181,C999,181,0,C553264065,0,0,1,0');
+  fs.writeFileSync(path.join(dir, 'ps.csv'), ps.join('\n'));
+  const p = await loadPaySim(path.join(dir, 'ps.csv'), { sample: 1 });
+  assert.equal(p.events.length, 401);
+  const fraud = p.events.find((e) => e.label === 'paysim_fraud');
+  assert.equal(fraud.event, 'transfer'); assert.equal(fraud.balance, 181); assert.equal(fraud.account, 'C553264065');
+  const r = analyze(p.events, { secret: KEY, keepRows: true });
+  assert.ok(r.rows.some((x) => x.label === 'paysim_fraud' && x.reasons.some((q) => q.code === 'account_drained')));
+
+  fs.writeFileSync(path.join(dir, 'train_transaction.csv'), ['TransactionID,isFraud,TransactionDT,TransactionAmt,ProductCD,card1,addr1,P_emaildomain',
+    ...Array.from({ length: 300 }, (_, i) => `${3000000 + i},${i === 299 ? 1 : 0},${86400 + i * 600},${(20 + i).toFixed(2)},W,${1000 + (i % 30)},${300 + (i % 5)},"gmail.com"`)].join('\n'));
+  fs.writeFileSync(path.join(dir, 'train_identity.csv'), 'TransactionID,DeviceType,DeviceInfo\n3000005,mobile,SM-G892A\n');
+  const ie = await loadIEEE(dir, { sample: 1 });
+  assert.equal(ie.events.length, 300);
+  assert.equal(ie.events.filter((e) => e.label === 'card_fraud').length, 1);
+  assert.equal(ie.events.find((e) => e.device === 'SM-G892A').amount, 25);
+
+  assert.deepEqual(splitCSVLine('a,"b,c",""'), ['a', 'b,c', '']);
+  assert.equal(keepCustomer('C123', 0.5), keepCustomer('C123', 0.5));
+  const kept = Array.from({ length: 2000 }, (_, i) => keepCustomer('C' + i, 0.05)).filter(Boolean).length;
+  assert.ok(kept > 60 && kept < 140, `sample ~5%, got ${kept}`);
+  fs.rmSync(dir, { recursive: true, force: true });
+});

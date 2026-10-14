@@ -30,7 +30,7 @@ const REASON = {
   impossible_travel: 'Impossible travel', brute_force: 'Repeated failed logins', shared_ip: 'IP shared by many accounts',
   large_amount: 'Unusually large transfer', txn_burst: 'Burst of transfers', large_download: 'Unusually large download',
   new_beneficiary: 'New beneficiary', new_device: 'New device', new_city: 'New city', odd_hour: 'Unusual hour',
-  unusual_pattern: 'Unusual pattern (model)'
+  unusual_pattern: 'Unusual pattern (model)', account_drained: 'Account emptied'
 };
 // MITRE ATT&CK techniques for signals that map cleanly. Fraud-only signals have no technique.
 const MITRE = {
@@ -361,7 +361,7 @@ function renderOverview(r) {
   heatmap($('#heat'), hours);
   const tech = {};
   for (const a of r.alerts) { const seen = new Set(); for (const x of a.reasons) { const m = MITRE[x.code]; if (m && !seen.has(m[0])) { seen.add(m[0]); tech[m[0]] = tech[m[0]] || { name: m[1], n: 0 }; tech[m[0]].n++; } } }
-  const fraud = r.alerts.filter((a) => a.reasons.some((x) => ['large_amount', 'txn_burst', 'new_beneficiary'].includes(x.code))).length;
+  const fraud = r.alerts.filter((a) => a.reasons.some((x) => ['large_amount', 'txn_burst', 'new_beneficiary', 'account_drained'].includes(x.code))).length;
   hbars($('#attack'), [...Object.entries(tech).sort((a, b) => b[1].n - a[1].n).map(([id, v]) => ({ label: `${id} · ${v.name}`, value: v.n })), { label: 'Payment-fraud signals (no ATT&CK ID)', value: fraud }], { color: '--s3' });
   updateTriageCounts();
 

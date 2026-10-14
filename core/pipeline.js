@@ -28,7 +28,9 @@ export function normalizeEvents(rows) {
       bytes: r.bytes !== undefined && r.bytes !== '' ? Number(r.bytes) : undefined,
       account: r.account ? String(r.account) : '', note: r.note ? String(r.note) : '',
       label: r.label ? String(r.label) : undefined,
-      case: r.case ? String(r.case) : undefined
+      case: r.case ? String(r.case) : undefined,
+      // Optional: account balance before the event (e.g. PaySim oldbalanceOrg), enables the 'account drained' signal.
+      balance: r.balance !== undefined && r.balance !== '' ? Number(r.balance) : undefined
     });
   });
   events.sort((a, b) => a.ts - b.ts);
@@ -223,11 +225,11 @@ export function parseCSV(text) {
   return rows.slice(1).map((r) => Object.fromEntries(head.map((h, i) => [h, (r[i] ?? '').trim()])));
 }
 
-export const CSV_COLUMNS = ['timestamp', 'user', 'event', 'ip', 'device', 'city', 'amount', 'bytes', 'account', 'note', 'label', 'case'];
+export const CSV_COLUMNS = ['timestamp', 'user', 'event', 'ip', 'device', 'city', 'amount', 'bytes', 'account', 'balance', 'note', 'label', 'case'];
 
 export function toCSV(events) {
   const esc = (v) => { const s = v === undefined || v === null ? '' : String(v); return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s; };
   const lines = [CSV_COLUMNS.join(',')];
-  for (const e of events) lines.push([new Date(e.ts).toISOString(), e.user, e.event, e.ip, e.device, e.city, e.amount, e.bytes, e.account, e.note, e.label, e.case].map(esc).join(','));
+  for (const e of events) lines.push([new Date(e.ts).toISOString(), e.user, e.event, e.ip, e.device, e.city, e.amount, e.bytes, e.account, e.balance, e.note, e.label, e.case].map(esc).join(','));
   return lines.join('\n') + '\n';
 }

@@ -5,10 +5,15 @@
   "type": "module",
   "private": true,
   "license": "MIT",
-  "engines": { "node": ">=18" },
-  "bin": { "sentinel-z": "cli/sentinel-z.js" },
+  "engines": {
+    "node": ">=18"
+  },
+  "bin": {
+    "sentinel-z": "cli/sentinel-z.js"
+  },
   "scripts": {
     "start": "node cli/serve.js",
+    "build": "node scripts/build.js",
     "test": "node --test",
     "demo": "node cli/sentinel-z.js generate --out data/sample-events.csv && node cli/sentinel-z.js analyze data/sample-events.csv --train-days 14",
     "sample": "node cli/sentinel-z.js generate --out data/sample-events.csv"

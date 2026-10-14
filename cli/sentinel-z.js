@@ -16,6 +16,7 @@ import { analyze, parseCSV, toCSV } from '../core/pipeline.js';
 import { randomKey } from '../core/privacy.js';
 import { explainLocally, isLocalUrl } from './llm.js';
 import { injectAttack, SIM_ATTACKS } from '../core/simulator.js';
+import { DATASETS } from './datasets.js';
 
 // Node 18 does not expose Web Crypto as a global; the shared core uses globalThis.crypto.
 if (!globalThis.crypto?.getRandomValues) Object.defineProperty(globalThis, 'crypto', { value: webcrypto, configurable: true });
@@ -35,6 +36,8 @@ Usage
   sentinel-z generate [--out data/sample-events.csv] [--seed 7] [--users 80]
   sentinel-z analyze <file.csv|file.json> [options]
   sentinel-z simulate [--type account_takeover] [--customer 3] [--day 2]
+  sentinel-z benchmark paysim <PS_..._log.csv> [--sample 0.05] [--out benchmarks/paysim.json]
+  sentinel-z benchmark ieee <folder with train_transaction.csv> [--sample 0.3] [--out benchmarks/ieee.json]
 
 Analyze options
   --train-days N       Use the first N days as normal behaviour (default: first 70% of the time span)
@@ -66,6 +69,43 @@ async function main() {
     const attacks = sc.events.filter((e) => e.label !== 'normal').length;
     console.log(`Wrote ${sc.events.length.toLocaleString()} events (${attacks} labelled attack events) to ${out}`);
     console.log(c.dim(`Baseline ends ${new Date(sc.trainUntil).toISOString()}  →  analyze with --train-days 14`));
+    return;
+  }
+
+  if (cmd === 'benchmark') {
+    const name = args[1], file = args[2];
+    const loader = DATASETS[name];
+    if (!loader) throw new Error(`Unknown dataset "${name || ''}". Use: paysim or ieee`);
+    if (!file || !fs.existsSync(file)) throw new Error(`Not found: ${file || '(none)'}. Download the dataset from Kaggle first (see README, "Benchmarks on public datasets").`);
+    const sample = Number(opt('sample', name === 'paysim' ? 0.05 : 0.3));
+    const t0 = Date.now();
+    console.log(c.dim(`Reading ${file} (customer sample rate ${sample}) …`));
+    const d = await loader(file, { sample, maxRows: Number(opt('max-rows', Infinity)) });
+    const positives = d.events.filter((e) => e.label !== 'normal').length;
+    console.log(`${d.dataset}: read ${d.seen.toLocaleString()} rows, kept ${d.events.length.toLocaleString()} events from ${new Set(d.events.map((e) => e.user)).size.toLocaleString()} customers (${positives.toLocaleString()} fraud events) in ${((Date.now() - t0) / 1000).toFixed(1)} s`);
+    const trainFrac = Number(opt('train-frac', 0.5));
+    const first = d.events.reduce((m, e) => Math.min(m, e.ts), Infinity), last = d.events.reduce((m, e) => Math.max(m, e.ts), -Infinity);
+    const r = analyze(d.events, { secret: process.env.SENTINEL_KEY || randomKey(), trainUntil: first + (last - first) * trainFrac, sensitivity: Number(opt('sensitivity', 99.5)), tzOffsetMinutes: 0 });
+    const e = r.evaluation;
+    if (!e) throw new Error('No labelled events in the evaluation window.');
+    console.log(`\n${c.b('Benchmark on ' + d.dataset)}  ${c.dim(`baseline first ${Math.round(trainFrac * 100)}% of time, evaluated on ${r.meta.test.toLocaleString()} later events, ${r.meta.ms} ms`)}`);
+    console.log(`ROC-AUC ${e.auc.toFixed(3)}  ·  precision ${pct(e.precision)}  ·  recall ${pct(e.recall)}  ·  F1 ${e.f1.toFixed(3)}  ·  false-alarm rate ${pct(e.fp / Math.max(1, e.negatives))}`);
+    console.log(`Fraud events ${e.positives.toLocaleString()} of ${(e.positives + e.negatives).toLocaleString()}  ·  fraudulent customers flagged ${e.attacks.caught}/${e.attacks.total}`);
+    for (const [k, v] of Object.entries(e.ablation)) console.log(c.dim(`  ${k.padEnd(7)} ROC-AUC ${v.auc.toFixed(3)} · precision ${pct(v.precision)} · recall ${pct(v.recall)}`));
+    const reasons = {};
+    for (const a of r.alerts) for (const x of a.reasons) reasons[x.code] = (reasons[x.code] || 0) + 1;
+    console.log(c.dim('  Top alert reasons: ' + Object.entries(reasons).sort((a, b) => b[1] - a[1]).slice(0, 5).map(([k, v]) => `${k} ${v}`).join(', ')));
+    const out = opt('out', `benchmarks/${name}.json`);
+    fs.mkdirSync(path.dirname(out), { recursive: true });
+    fs.writeFileSync(out, JSON.stringify({
+      dataset: d.dataset, source: d.source, generated: new Date().toISOString(), node: process.version, platform: `${process.platform}/${process.arch}`,
+      rowsRead: d.seen, customerSampleRate: sample, eventsKept: d.events.length, fraudEvents: positives, trainFraction: trainFrac,
+      threshold: r.meta.threshold, evaluatedEvents: r.meta.test, runtimeMs: r.meta.ms,
+      metrics: { rocAuc: e.auc, precision: e.precision, recall: e.recall, f1: e.f1, tp: e.tp, fp: e.fp, fn: e.fn, tn: e.tn, fraudCustomersFlagged: e.attacks },
+      ablation: Object.fromEntries(Object.entries(e.ablation).map(([k, v]) => [k, { rocAuc: v.auc, precision: v.precision, recall: v.recall, f1: v.f1 }])),
+      topReasons: reasons
+    }, null, 2));
+    console.log(`\nSaved metrics (no raw data) to ${out}`);
     return;
   }
 

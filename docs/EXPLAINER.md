@@ -31,7 +31,7 @@ The synthetic bank has 80 customers over 21 days and 26 injected attacks of 7 ty
 - Hybrid recall is 94.2%, against 67.5% for the model alone and 85.0% for the rules alone.
 - The insider-misuse attack has no rule. The model catches 15 of its 20 events; the rules catch 6.
 - The dashboard shows **0 requests to other servers**, and a Content-Security-Policy makes uploads impossible.
-- 13 automated tests. They include checks that no raw email or internal IP appears anywhere in the output.
+- 15 automated tests. They include checks that no raw email or internal IP appears anywhere in the output.
 
 ## Why IBM Z
 

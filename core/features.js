@@ -172,6 +172,7 @@ export function explain(event, x, ctx) {
   if (txns >= 4) r.push({ code: 'txn_burst', w: 7, text: `${txns} transfers in 10 minutes` });
   if (bytesZ >= 3) r.push({ code: 'large_download', w: 7, text: `Download of ${mb(+event.bytes)}, ${Math.max(2, Math.round(+event.bytes / Math.max(1, ctx.typicalBytes)))}× the usual size` });
   if (newBen) r.push({ code: 'new_beneficiary', w: 5, text: 'Payment to a new beneficiary' });
+  if (event.event === 'transfer' && +event.balance > 0 && +event.amount >= 0.95 * +event.balance) r.push({ code: 'account_drained', w: 7, text: `Transfer of ${inr(+event.amount)} empties the account (balance ${inr(+event.balance)})` });
   if (newDevice) r.push({ code: 'new_device', w: 5, text: 'New device for this user' });
   if (newCity) r.push({ code: 'new_city', w: 4, text: `First activity from ${event.city}` });
   if (hourDev >= 3) r.push({ code: 'odd_hour', w: 3, text: `Unusual time ${hhmm(ctx.hour)} (usually around ${hhmm(ctx.usualHour)})` });
