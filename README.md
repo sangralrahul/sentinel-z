@@ -148,7 +148,43 @@ Files are streamed, so the full datasets work on a laptop. Customers are sampled
 
 For PaySim, an optional `balance` column enables a banking signal used everywhere: **account drained** (a transfer that empties the account). Your own logs can use it too.
 
-Results from these runs are recorded in `benchmarks/` once produced. We do not publish numbers we have not measured.
+### Measured result: PaySim (full 6.36M-row file)
+
+Run on 15 Oct 2026 with `node cli/sentinel-z.js benchmark paysim …` (defaults: 5% customer sample, first 50% of time as baseline, sensitivity 99.5). Metrics are saved in [`benchmarks/paysim.json`](benchmarks/paysim.json).
+
+| | |
+|---|---|
+| Rows read | 6,362,620 |
+| Kept (5% of customers) | 318,119 events from 317,664 customers, 412 fraud events |
+| Evaluated (second half of time) | 56,409 events, of which 201 fraud (0.36%) |
+| **ROC-AUC** | **0.919** |
+| **Recall** | **84.6%** (170 of 201 fraudulent customers flagged) |
+| Precision | 2.0%, about **5.6× better than random** (base rate 0.36%) |
+| False-alarm rate | 14.6% of normal events |
+| Runtime | 35 s to stream the file, 14 s to score, on a laptop |
+
+| Scorer | ROC-AUC | Precision | Recall |
+|---|---|---|---|
+| Isolation Forest only | 0.785 | 0.8% | 68.7% |
+| Rules only | 0.861 | 1.4% | 97.5% |
+| **Hybrid (used)** | **0.919** | **2.0%** | 84.6% |
+
+**How to read this honestly.**
+- Sentinel-Z was **not trained on PaySim's fraud labels**. It is unsupervised: it learns normal behaviour from the first half and scores the second half. The labels are used only to measure the result.
+- PaySim is hard for a behaviour-based detector: over 99.8% of its customers make exactly one transaction, so there is almost no per-customer history to learn from. The hybrid still ranks fraud above normal activity 92% of the time.
+- Most alerts come from the "account drained" signal (a transfer that empties the account), which is PaySim's fraud pattern but also matches some legitimate transfers. That is why precision is low and false alarms are high at this threshold. Raising the sensitivity, or adding beneficiary history, trades recall for precision.
+- Supervised models trained directly on PaySim's labels usually report higher scores, but they need labelled fraud, see the raw data, and do not transfer to a new bank without retraining. Sentinel-Z needs none of that.
+
+### How Sentinel-Z compares with existing approaches
+
+| Approach | Needs labelled fraud | Sees raw customer identities | Explains each alert | Runs on-premises / IBM Z | Catches new patterns |
+|---|---|---|---|---|---|
+| Static rule engines | No | Yes | Yes | Yes | No |
+| Supervised ML (e.g. gradient boosting) | Yes, lots | Yes | Partly (feature importance) | Usually | Weakly |
+| Cloud fraud-scoring APIs | Vendor-trained | Yes, sent to the vendor | Usually a score only | No | Depends on vendor |
+| **Sentinel-Z** | **No** | **No (keyed pseudonyms)** | **Yes, plain English + ATT&CK** | **Yes (s390x, zero dependencies)** | **Yes (Isolation Forest)** |
+
+IEEE-CIS results will be added the same way once run.
 
 ## How it works
 
@@ -323,7 +359,7 @@ npx vercel --prod
 
 ## Limitations and next steps
 
-- The evaluation uses synthetic data. Next step: validate on a public or partner dataset (e.g. LANL authentication logs, or anonymised bank logs inside the bank's own environment).
+- Main results use synthetic data; the PaySim benchmark shows the method transfers (ROC-AUC 0.919) but with low precision on a dataset where customers have almost no history. Next: IEEE-CIS, LANL authentication logs, and anonymised logs inside a partner bank.
 - The baseline is static per run. Next: rolling baselines and analyst feedback, where a dismissed alert becomes a known-good pattern.
 - City-level geolocation only. Next: ASN and VPN signals.
 - Pseudonyms protect identity, not behaviour. A very distinctive pattern can still hint at who someone is, which is why the shareable output uses differential privacy and the detailed report stays with the security team.

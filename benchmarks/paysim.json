@@ -1,0 +1,55 @@
+{
+  "dataset": "PaySim",
+  "source": "PS_20174392719_1491204439457_log.csv",
+  "generated": "2026-10-14T19:39:30.401Z",
+  "node": "v24.15.0",
+  "platform": "win32/x64",
+  "rowsRead": 6362620,
+  "customerSampleRate": 0.05,
+  "eventsKept": 318119,
+  "fraudEvents": 412,
+  "trainFraction": 0.5,
+  "threshold": 0.8617410929455216,
+  "evaluatedEvents": 56409,
+  "runtimeMs": 13790,
+  "metrics": {
+    "rocAuc": 0.9186897582256665,
+    "precision": 0.0203276336242975,
+    "recall": 0.845771144278607,
+    "f1": 0.03970107426436245,
+    "tp": 170,
+    "fp": 8193,
+    "fn": 31,
+    "tn": 48015,
+    "fraudCustomersFlagged": {
+      "total": 201,
+      "caught": 170
+    }
+  },
+  "ablation": {
+    "model": {
+      "rocAuc": 0.7845661742525629,
+      "precision": 0.007981953843484296,
+      "recall": 0.6865671641791045,
+      "f1": 0.01578044596912521
+    },
+    "rules": {
+      "rocAuc": 0.8606532346805681,
+      "precision": 0.013588463671658347,
+      "recall": 0.9751243781094527,
+      "f1": 0.026803418803418803
+    },
+    "hybrid": {
+      "rocAuc": 0.9186897582256665,
+      "precision": 0.0203276336242975,
+      "recall": 0.845771144278607,
+      "f1": 0.03970107426436245
+    }
+  },
+  "topReasons": {
+    "large_amount": 1,
+    "account_drained": 8337,
+    "new_beneficiary": 50,
+    "odd_hour": 32
+  }
+}

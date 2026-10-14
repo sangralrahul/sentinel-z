@@ -31,6 +31,7 @@ The synthetic bank has 80 customers over 21 days and 26 injected attacks of 7 ty
 - Hybrid recall is 94.2%, against 67.5% for the model alone and 85.0% for the rules alone.
 - The insider-misuse attack has no rule. The model catches 15 of its 20 events; the rules catch 6.
 - The dashboard shows **0 requests to other servers**, and a Content-Security-Policy makes uploads impossible.
+- **Public benchmark (PaySim, 6.36M rows, never trained on its labels):** ROC-AUC 0.919, recall 84.6%, precision 2.0% (5.6× the 0.36% base rate). The hybrid beats the model alone (0.785) and rules alone (0.861).
 - 15 automated tests. They include checks that no raw email or internal IP appears anywhere in the output.
 
 ## Why IBM Z
@@ -39,7 +40,7 @@ Core banking already runs on IBM Z. An engine with no dependencies, no GPU requi
 
 ## Honest limits
 
-- The data is synthetic.
+- The headline numbers use synthetic data; on PaySim precision is low (2.0%) because customers there have almost no history.
 - Baselines are static per run.
 - Geolocation is city-level only.
 
